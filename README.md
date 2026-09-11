@@ -5,7 +5,7 @@ Production PWA cho thử nghiệm cài đặt và chạy thực tế trên mobil
 ## Production
 - GitHub Pages: https://giaphatgpt123-wq.github.io/di-dau-day/
 - Branch phát hành: `main`
-- Release candidate: `D1-RC1.2.0`
+- Release candidate: `A1-RC4-GH1`
 - Deploy: GitHub Actions → GitHub Pages
 
 ## PWA install
@@ -18,7 +18,7 @@ Workflow chỉ deploy khi các kiểm tra sau PASS:
 - `index.html`, `manifest.webmanifest`, `sw.js` tồn tại;
 - icon PWA 192×192, 512×512 và Apple Touch Icon tồn tại;
 - manifest có các trường cốt lõi và tham chiếu icon hợp lệ;
-- `index.html` mang phiên bản `D1-RC1.2.0`;
+- `index.html` mang phiên bản `A1-RC4-GH1`;
 - Service Worker mang cache version RC1.2.
 
 ## Dữ liệu người dùng
