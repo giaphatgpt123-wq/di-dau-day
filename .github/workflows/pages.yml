@@ -1,4 +1,4 @@
-name: Deploy D1 RC1.5 PDH PWA to GitHub Pages
+name: Deploy A1 RC4 PWA to GitHub Pages
 
 on:
   push:
@@ -24,82 +24,38 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate D1 RC1.5 install + end-to-end release gate
+      - name: Validate PWA release gate
         shell: bash
         run: |
           set -euo pipefail
           test -s index.html
-          test -s styles.css
-          test -s app.js
-          test -s install-check.js
           test -s manifest.webmanifest
           test -s sw.js
-          test -s data/routes-pdh.json
-          test -s data/geometry-pdh.json
+          test -s install-qr.png
           test -s icons/icon-192.png
           test -s icons/icon-512.png
           test -s icons/apple-touch-icon.png
           python - <<'PY'
           import json
           from pathlib import Path
-
           m=json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
+          required={'name','short_name','start_url','scope','display','icons'}
+          missing=required-set(m)
+          assert not missing, f'Manifest missing: {sorted(missing)}'
           assert m['display'] in {'standalone','fullscreen','minimal-ui'}
-          assert m.get('start_url')=='./' and m.get('scope')=='./'
-          assert m.get('lang')=='vi'
-          assert m.get('prefer_related_applications') is False
           sizes={i.get('sizes') for i in m['icons']}
-          assert {'192x192','512x512'} <= sizes
-          assert 'RC1.5' in m.get('description','')
-
-          routes=json.loads(Path('data/routes-pdh.json').read_text(encoding='utf-8'))
-          assert routes.get('version')=='PDH-ROUTES-2.0'
-          rs=routes.get('routes',[])
-          assert len(rs)==11
-          assert [r['id'] for r in rs]==[f'R-{i:03d}' for i in range(1,12)]
-          assert sum(len(r.get('segments',[])) for r in rs)==39
-          s=routes.get('summary',{})
-          assert s.get('nodes')==53 and s.get('bidirectionalEdges')==78 and s.get('crossLinks')==50
-
-          geometry=json.loads(Path('data/geometry-pdh.json').read_text(encoding='utf-8'))
-          assert geometry.get('version')=='PDH-GEOMETRY-1.0'
-          nodes=geometry.get('nodes',[])
-          assert len(nodes)==53
-          assert [n['id'] for n in nodes]==[f'N-{i:03d}' for i in range(1,54)]
-          assert geometry.get('policy',{}).get('approvalRequired') is True
-          assert geometry.get('policy',{}).get('mapMatchingUsesApprovedOnly') is True
-          assert all('lat' not in n and 'lng' not in n for n in nodes)
-
+          assert '192x192' in sizes and '512x512' in sizes, 'Missing 192/512 PWA icons'
+          for icon in m['icons']:
+              src=icon.get('src','')
+              if src and not src.startswith(('http://','https://')):
+                  assert Path(src).is_file(), f'Missing manifest icon: {src}'
           html=Path('index.html').read_text(encoding='utf-8')
-          assert 'D1-RC1.5' in html
-          assert 'app.js?v=1.5.0' in html
-          assert 'styles.css?v=1.5.1' in html
-          assert 'install-check.js?v=1.5.1' in html
-          assert 'installDiag' in html
-
-          js=Path('app.js').read_text(encoding='utf-8')
-          required=[
-            "D1-RC1.5.0","APPROVED_GEOMETRY","FIELD_CAPTURED","APPROVED_TRACE","FIELD_TRACE",
-            "edgeState","routeState","qaState","startTrace","stopTrace","approveTrace","distanceToTrace",
-            "recognizeRoute","watchPosition","getCurrentPosition","accuracy>250","captureNode","approveNode",
-            "exportBackup","importBackup","audit","openPoiForm","parseMapUrl","createUser","createAdmin",
-            "beforeinstallprompt","appinstalled","isStandalone"
-          ]
-          for token in required:
-              assert token in js, f'Missing RC1.5 token: {token}'
-          assert 'ROUTE_ANCHORS' not in js
-          assert "status==='APPROVED_TRACE'" in js
-          assert "status==='APPROVED_GEOMETRY'" in js
-
-          diag=Path('install-check.js').read_text(encoding='utf-8')
-          for token in ['HTTPS','Manifest','SW đăng ký','SW điều khiển','Chưa standalone','getRegistrations','controllerchange']:
-              assert token in diag, f'Missing install diagnostic token: {token}'
-
+          assert "A1-RC4-GH1" in html, 'index.html is not RC1.2.0'
+          assert 'manifest.webmanifest' in html, 'Manifest link missing from index.html'
+          assert 'install-qr.png' in html, 'Install QR missing from index.html'
           sw=Path('sw.js').read_text(encoding='utf-8')
-          assert 'd1-rc1.5-shell-v2' in sw
-          for token in ['app.js','styles.css','install-check.js','manifest.webmanifest','routes-pdh.json','geometry-pdh.json',"cache:'no-store'"]:
-              assert token in sw
-          print('D1 RC1.5 INSTALL + END-TO-END RELEASE GATE: PASS')
+          assert 'a1-rc4-gh1-shell-v1' in sw, 'Unexpected service-worker cache version'
+          print('PWA RELEASE GATE: PASS')
           PY
 
       - name: Configure Pages
