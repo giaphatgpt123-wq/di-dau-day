@@ -1,0 +1,10 @@
+<resources>
+    <style name="Theme.DiDauDay" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:statusBarColor">#153D2A</item>
+        <item name="android:navigationBarColor">#153D2A</item>
+        <item name="android:colorAccent">#F2B64A</item>
+        <item name="android:windowActionModeOverlay">true</item>
+    </style>
+</resources>
