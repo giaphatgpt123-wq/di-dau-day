@@ -1,0 +1,24 @@
+# Android / Gradle
+.gradle/
+android/.gradle/
+android/local.properties
+android/**/build/
+
+# Never commit signing material
+*.jks
+*.keystore
+*.p12
+*.pem
+*.key
+release-signing/
+
+# Local distributions
+/dist/
+*.apk
+*.aab
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.iml
