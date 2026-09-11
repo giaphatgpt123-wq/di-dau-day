@@ -86,3 +86,5 @@ jobs:
             dist/Di-Dau-Day-D1-1.5.1-release.apk.sha256
           if-no-files-found: error
           retention-days: 90
+
+# rerun marker: 2026-09-11 signing secrets validation
