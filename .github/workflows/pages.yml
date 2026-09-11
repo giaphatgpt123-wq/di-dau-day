@@ -1,4 +1,4 @@
-name: Deploy D1 PWA to GitHub Pages
+name: Deploy A1 RC4 PWA to GitHub Pages
 
 on:
   push:
@@ -49,10 +49,10 @@ jobs:
               if src and not src.startswith(('http://','https://')):
                   assert Path(src).is_file(), f'Missing manifest icon: {src}'
           html=Path('index.html').read_text(encoding='utf-8')
-          assert "D1-RC1.2.0" in html, 'index.html is not RC1.2.0'
+          assert "A1-RC4-GH1" in html, 'index.html is not RC1.2.0'
           assert 'manifest.webmanifest' in html, 'Manifest link missing from index.html'
           sw=Path('sw.js').read_text(encoding='utf-8')
-          assert 'd1-rc1.2-shell-v6' in sw, 'Unexpected service-worker cache version'
+          assert 'a1-rc4-gh1-shell-v1' in sw, 'Unexpected service-worker cache version'
           print('PWA RELEASE GATE: PASS')
           PY
 
