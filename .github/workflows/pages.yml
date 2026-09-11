@@ -1,4 +1,4 @@
-name: Deploy D1 RC1.3 PWA to GitHub Pages
+name: Deploy D1 RC1.3.1 PDH PWA to GitHub Pages
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate D1 RC1.3 release gate
+      - name: Validate D1 RC1.3.1 PDH release gate
         shell: bash
         run: |
           set -euo pipefail
@@ -43,15 +43,23 @@ jobs:
           sizes={i.get('sizes') for i in m['icons']}
           assert {'192x192','512x512'} <= sizes
           routes=json.loads(Path('data/routes-pdh.json').read_text(encoding='utf-8'))
-          assert routes.get('version')=='PDH-ROUTES-1.0'
-          assert len(routes.get('routes',[])) >= 10
+          assert routes.get('version')=='PDH-ROUTES-2.0'
+          rs=routes.get('routes',[])
+          assert len(rs)==11, f'Expected 11 PDH corridors, got {len(rs)}'
+          assert [r['id'] for r in rs]==[f'R-{i:03d}' for i in range(1,12)]
+          assert sum(len(r.get('segments',[])) for r in rs)==39
+          summary=routes.get('summary',{})
+          assert summary.get('nodes')==53
+          assert summary.get('bidirectionalEdges')==78
+          assert summary.get('crossLinks')==50
+          assert summary.get('activeEdges')==0
           html=Path('index.html').read_text(encoding='utf-8')
-          for token in ['D1-RC1.3.0','Tuyến & lộ trình PDH Travel','watchPosition','createAdmin','installBox']:
-              assert token in html, f'Missing RC1.3 token: {token}'
+          for token in ['D1-RC1.3.1','Mạng tuyến PDH','PDH-ROUTES-2.0','watchPosition','createAdmin','installBox','R-001']:
+              assert token in html, f'Missing RC1.3.1 token: {token}'
           sw=Path('sw.js').read_text(encoding='utf-8')
-          assert 'd1-rc1.3-shell-v1' in sw
-          assert './data/routes-pdh.json' in sw
-          print('D1 RC1.3 RELEASE GATE: PASS')
+          assert 'd1-rc1.3.1-shell-v2' in sw
+          assert 'routes-pdh.json' in sw and "cache:'no-store'" in sw
+          print('D1 RC1.3.1 PDH RELEASE GATE: PASS')
           PY
 
       - name: Configure Pages
