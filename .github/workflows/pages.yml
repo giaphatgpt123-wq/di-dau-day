@@ -1,4 +1,4 @@
-name: Deploy RC5.1 installer gateway to GitHub Pages
+name: Deploy RC5.2 installer gateway to GitHub Pages
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate RC5.1 installer gateway
+      - name: Validate RC5.2 installer gateway
         shell: bash
         run: |
           set -euo pipefail
@@ -32,10 +32,10 @@ jobs:
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
-          assert 'A1-RC5.1' in html
+          assert 'A1-RC5.2' in html
           assert 'di-dau-day-a1-mobile.giaphatgpt123.chatgpt.site/install.html' in html
           assert 'dữ liệu mẫu' in html.lower()
-          print('RC5.1 INSTALLER GATE: PASS')
+          print('RC5.2 INSTALLER GATE: PASS')
           PY
 
       - name: Configure Pages
