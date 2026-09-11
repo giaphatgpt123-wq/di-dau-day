@@ -2,6 +2,13 @@ plugins {
     id 'com.android.application'
 }
 
+def releaseKeystore = System.getenv('ANDROID_KEYSTORE_FILE')
+def releaseStorePassword = System.getenv('ANDROID_KEYSTORE_PASSWORD')
+def releaseKeyAlias = System.getenv('ANDROID_KEY_ALIAS')
+def releaseKeyPassword = System.getenv('ANDROID_KEY_PASSWORD')
+
+def releaseSigningReady = [releaseKeystore, releaseStorePassword, releaseKeyAlias, releaseKeyPassword].every { it != null && !it.isBlank() }
+
 android {
     namespace 'com.pdhtravel.didauday'
     compileSdk 35
@@ -10,8 +17,23 @@ android {
         applicationId 'com.pdhtravel.didauday'
         minSdk 26
         targetSdk 35
-        versionCode 150
-        versionName '1.5.0'
+        versionCode 151
+        versionName '1.5.1'
+    }
+
+    signingConfigs {
+        release {
+            if (releaseSigningReady) {
+                storeFile file(releaseKeystore)
+                storePassword releaseStorePassword
+                keyAlias releaseKeyAlias
+                keyPassword releaseKeyPassword
+                enableV1Signing true
+                enableV2Signing true
+                enableV3Signing true
+                enableV4Signing true
+            }
+        }
     }
 
     buildTypes {
@@ -23,9 +45,22 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (releaseSigningReady) {
+                signingConfig signingConfigs.release
+            }
         }
     }
 }
+
+tasks.register('verifyReleaseSigning') {
+    doLast {
+        if (!releaseSigningReady) {
+            throw new GradleException('Release signing variables are missing. Use GitHub Actions secrets; never commit the keystore to this public repository.')
+        }
+    }
+}
+
+tasks.named('assembleRelease').configure { dependsOn 'verifyReleaseSigning' }
 
 tasks.register('syncWebAssets', Copy) {
     from(rootProject.projectDir.parentFile) {
