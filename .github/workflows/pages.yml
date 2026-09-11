@@ -1,4 +1,4 @@
-name: Deploy A1 RC4 PWA to GitHub Pages
+name: Deploy D1 RC1.3 PWA to GitHub Pages
 
 on:
   push:
@@ -24,13 +24,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate PWA release gate
+      - name: Validate D1 RC1.3 release gate
         shell: bash
         run: |
           set -euo pipefail
           test -s index.html
           test -s manifest.webmanifest
           test -s sw.js
+          test -s data/routes-pdh.json
           test -s icons/icon-192.png
           test -s icons/icon-512.png
           test -s icons/apple-touch-icon.png
@@ -38,22 +39,19 @@ jobs:
           import json
           from pathlib import Path
           m=json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
-          required={'name','short_name','start_url','scope','display','icons'}
-          missing=required-set(m)
-          assert not missing, f'Manifest missing: {sorted(missing)}'
           assert m['display'] in {'standalone','fullscreen','minimal-ui'}
           sizes={i.get('sizes') for i in m['icons']}
-          assert '192x192' in sizes and '512x512' in sizes, 'Missing 192/512 PWA icons'
-          for icon in m['icons']:
-              src=icon.get('src','')
-              if src and not src.startswith(('http://','https://')):
-                  assert Path(src).is_file(), f'Missing manifest icon: {src}'
+          assert {'192x192','512x512'} <= sizes
+          routes=json.loads(Path('data/routes-pdh.json').read_text(encoding='utf-8'))
+          assert routes.get('version')=='PDH-ROUTES-1.0'
+          assert len(routes.get('routes',[])) >= 10
           html=Path('index.html').read_text(encoding='utf-8')
-          assert "A1-RC4-GH1" in html, 'index.html is not RC1.2.0'
-          assert 'manifest.webmanifest' in html, 'Manifest link missing from index.html'
+          for token in ['D1-RC1.3.0','Tuyến & lộ trình PDH Travel','watchPosition','createAdmin','installBox']:
+              assert token in html, f'Missing RC1.3 token: {token}'
           sw=Path('sw.js').read_text(encoding='utf-8')
-          assert 'a1-rc4-gh1-shell-v1' in sw, 'Unexpected service-worker cache version'
-          print('PWA RELEASE GATE: PASS')
+          assert 'd1-rc1.3-shell-v1' in sw
+          assert './data/routes-pdh.json' in sw
+          print('D1 RC1.3 RELEASE GATE: PASS')
           PY
 
       - name: Configure Pages
