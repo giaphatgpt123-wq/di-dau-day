@@ -8,7 +8,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="icon" href="icons/icon-192.png">
-<link rel="stylesheet" href="styles.css?v=1.5.0">
+<link rel="stylesheet" href="styles.css?v=1.5.1">
 <title>Đi Đâu Đây · PDH Travel</title>
 </head>
 <body>
@@ -18,7 +18,7 @@
 <button class="gps" id="gpsBtn" aria-label="Bật GPS">⌖</button>
 <small>TUYẾN ĐANG CHỌN</small><h1 id="routeTitle">Đang tải PDH…</h1><p id="routeInfo">Đang kiểm tra route engine.</p>
 <div class="gpsbox"><div class="gpsline"><span id="gpsStatus">GPS: chưa xác định</span><span id="gpsAccuracy">Sai số: —</span></div><div class="gpsline"><span id="gpsMotion">Tốc độ: — · Hướng: —</span><span id="gpsAge">Tuổi mẫu: —</span></div><div class="detect" id="routeDetect">Map matching: chờ GPS/trace đã duyệt.</div></div>
-<div class="install" id="installBox"><b>Cài ứng dụng</b><div class="meta" id="installMsg">Đang kiểm tra khả năng cài.</div><button class="primary" id="installBtn">Cài ngay</button></div>
+<div class="install" id="installBox"><b>Cài ứng dụng</b><div class="meta" id="installMsg">Đang kiểm tra khả năng cài.</div><div class="meta" id="installDiag" style="margin-top:6px">Kiểm tra cài đặt: đang chạy…</div><button class="primary" id="installBtn">Cài ngay</button></div>
 </section>
 <div class="tabs"><button data-view="routes" class="active">Mạng tuyến</button><button data-view="geometry">Geometry 53 nút</button><button data-view="library">Thư viện</button><button data-view="admin">Admin / QA</button></div>
 <div class="search"><input id="search" placeholder="Tìm tuyến, segment, node, địa điểm…"></div>
@@ -27,5 +27,6 @@
 <nav class="nav"><button data-nav="routes" class="active">Tuyến</button><button data-nav="geometry">GPS nút</button><button data-nav="library">Thư viện</button><button data-nav="admin">QA</button><button data-nav="account">Tài khoản</button></nav>
 <div id="modal"></div>
 <script src="app.js?v=1.5.0" defer></script>
+<script src="install-check.js?v=1.5.1" defer></script>
 </body>
 </html>
