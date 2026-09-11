@@ -13,6 +13,7 @@ RC1.3 thay RC1.2 demo shell bằng cấu trúc tuyến/lộ trình PDH Travel v�
 - Install panel tự ẩn khi app chạy standalone.
 - Nhập điểm thủ công dùng tọa độ thật và checkbox kiểm chứng tại chỗ; không auto-verify.
 - Tài khoản User/Admin cục bộ; cho phép thiết lập Admin đầu tiên trên thiết bị.
+- Bộ icon RC1.3 mới dùng biểu tượng lộ trình + ghim vị trí, thay icon cũ.
 - Service Worker cache catalog tuyến để hỗ trợ offline shell.
 - GitHub Actions chặn deploy nếu RC1.3 thiếu tuyến, GPS, Admin bootstrap hoặc asset PWA.
 
