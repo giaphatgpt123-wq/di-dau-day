@@ -1,0 +1,42 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.pdhtravel.didauday'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.pdhtravel.didauday'
+        minSdk 26
+        targetSdk 35
+        versionCode 150
+        versionName '1.5.0'
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+tasks.register('syncWebAssets', Copy) {
+    from(rootProject.projectDir.parentFile) {
+        include 'index.html'
+        include 'app.js'
+        include 'styles.css'
+        include 'manifest.webmanifest'
+        include 'data/**'
+        include 'icons/**'
+    }
+    into layout.projectDirectory.dir('src/main/assets/www')
+}
+
+preBuild.dependsOn syncWebAssets
