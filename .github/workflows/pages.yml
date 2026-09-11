@@ -1,4 +1,4 @@
-name: Deploy D1 RC1.4 PDH PWA to GitHub Pages
+name: Deploy D1 RC1.4.1 PDH PWA to GitHub Pages
 
 on:
   push:
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate D1 RC1.4 GPS release gate
+      - name: Validate D1 RC1.4.1 geometry release gate
         shell: bash
         run: |
           set -euo pipefail
@@ -32,16 +32,19 @@ jobs:
           test -s manifest.webmanifest
           test -s sw.js
           test -s data/routes-pdh.json
+          test -s data/geometry-pdh.json
           test -s icons/icon-192.png
           test -s icons/icon-512.png
           test -s icons/apple-touch-icon.png
           python - <<'PY'
           import json
           from pathlib import Path
+
           m=json.loads(Path('manifest.webmanifest').read_text(encoding='utf-8'))
           assert m['display'] in {'standalone','fullscreen','minimal-ui'}
           sizes={i.get('sizes') for i in m['icons']}
           assert {'192x192','512x512'} <= sizes
+
           routes=json.loads(Path('data/routes-pdh.json').read_text(encoding='utf-8'))
           assert routes.get('version')=='PDH-ROUTES-2.0'
           rs=routes.get('routes',[])
@@ -49,16 +52,39 @@ jobs:
           assert [r['id'] for r in rs]==[f'R-{i:03d}' for i in range(1,12)]
           assert sum(len(r.get('segments',[])) for r in rs)==39
           s=routes.get('summary',{})
-          assert s.get('nodes')==53 and s.get('bidirectionalEdges')==78 and s.get('crossLinks')==50 and s.get('activeEdges')==0
+          assert s.get('nodes')==53
+          assert s.get('bidirectionalEdges')==78
+          assert s.get('crossLinks')==50
+          assert s.get('activeEdges')==0
+
+          geometry=json.loads(Path('data/geometry-pdh.json').read_text(encoding='utf-8'))
+          assert geometry.get('version')=='PDH-GEOMETRY-1.0'
+          nodes=geometry.get('nodes',[])
+          assert len(nodes)==53, f'Expected 53 geometry nodes, got {len(nodes)}'
+          assert [n['id'] for n in nodes]==[f'N-{i:03d}' for i in range(1,54)]
+          assert geometry.get('policy',{}).get('approvalRequired') is True
+          assert geometry.get('policy',{}).get('mapMatchingUsesApprovedOnly') is True
+          assert geometry.get('summary',{}).get('approved')==0
+          assert geometry.get('summary',{}).get('fieldCaptured')==0
+          assert geometry.get('summary',{}).get('pending')==53
+          assert all('lat' not in n and 'lng' not in n for n in nodes), 'Base geometry must not contain invented coordinates'
+
           html=Path('index.html').read_text(encoding='utf-8')
-          required=['D1-RC1.4.0','ROUTE_ANCHORS','watchPosition','getCurrentPosition','recognizeRoute','weightedFix','acceptableFix','permissionState','accuracy>250','confidence===\'CAO\'','d1-route-detection']
+          required=[
+              'D1-RC1.4.1','PDH-GEOMETRY-1.0','APPROVED_GEOMETRY','FIELD_CAPTURED',
+              'captureNode','approveNode','d1-geometry-overrides','watchPosition',
+              'getCurrentPosition','recognizeRoute','accuracy>250','pointSegKm'
+          ]
           for token in required:
-              assert token in html, f'Missing RC1.4 GPS token: {token}'
-          assert html.count("'R-0") >= 11
+              assert token in html, f'Missing RC1.4.1 token: {token}'
+          assert 'ROUTE_ANCHORS' not in html, 'Hard-coded route anchors must be removed'
+
           sw=Path('sw.js').read_text(encoding='utf-8')
-          assert 'd1-rc1.4-shell-v1' in sw
-          assert 'routes-pdh.json' in sw and "cache:'no-store'" in sw
-          print('D1 RC1.4 GPS + ROUTE RECOGNITION GATE: PASS')
+          assert 'd1-rc1.4.1-shell-v2' in sw
+          assert 'geometry-pdh.json' in sw
+          assert 'routes-pdh.json' in sw
+          assert "cache:'no-store'" in sw
+          print('D1 RC1.4.1 APPROVED GEOMETRY GATE: PASS')
           PY
 
       - name: Configure Pages
