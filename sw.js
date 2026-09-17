@@ -1,10 +1,11 @@
-const CACHE_VERSION='d1-rc2-shell-v1';
-const RUNTIME_CACHE='d1-rc2-runtime-v1';
+const CACHE_VERSION='d1-rc2-shell-v2';
+const RUNTIME_CACHE='d1-rc2-runtime-v2';
 const APP_SHELL=[
   './',
   './index.html',
   './styles.css',
   './app.js',
+  './rc2-core.js',
   './manifest.webmanifest',
   './install-qr.png',
   './icons/icon.svg',
