@@ -15,10 +15,12 @@
   const directions=p=>`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(mapDest(p))}`;
   const mapUrl=p=>`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapDest(p))}`;
   let active='Tất cả';
-  let radius=50;
+  let radius=Number(localStorage.getItem('d1-discovery-radius'))||50;
+
+  const currentOrigin=()=>lastFix||JSON.parse(localStorage.getItem('d1-last-gps')||'null');
 
   function discoveryList(q=''){
-    const origin=window.lastFix||JSON.parse(localStorage.getItem('d1-last-gps')||'null');
+    const origin=currentOrigin();
     return pois().map(p=>({
       ...p,
       group:categoryGroup(p),
@@ -36,7 +38,7 @@
   }
 
   window.renderDiscovery=function(q=''){
-    const origin=window.lastFix||JSON.parse(localStorage.getItem('d1-last-gps')||'null');
+    const origin=currentOrigin();
     const list=discoveryList(q);
     const cats=['Tất cả','Ăn uống','Tham quan','Lưu trú'];
     const cards=list.length?list.map(p=>`<article class="panel">
@@ -49,26 +51,26 @@
     document.getElementById('main').innerHTML=`<h2>Khám phá quanh tôi</h2>
       <div class="notice">${origin?`Đang dùng vị trí GPS gần nhất ±${Math.round(origin.accuracy||0)} m.`:'Chưa có GPS. Bật Vị trí hiện tại để sắp xếp theo khoảng cách thực.'}</div>
       <div class="actions">${cats.map(c=>`<button class="${c===active?'primary':''}" onclick="setDiscoveryCategory('${c}')">${c}</button>`).join('')}</div>
-      <div class="actions"><label class="meta">Bán kính <select id="discoveryRadius" onchange="setDiscoveryRadius(this.value)"><option value="10" ${radius===10?'selected':''}>10 km</option><option value="20" ${radius===20?'selected':''}>20 km</option><option value="30" ${radius===30?'selected':''}>30 km</option><option value="50" ${radius===50?'selected':''}>50 km</option><option value="100" ${radius===100?'selected':''}>100 km</option></select></label></div>
+      <div class="actions"><label class="meta">Bán kính <select id="discoveryRadius" onchange="setDiscoveryRadius(this.value)"><option value="10" ${radius===10?'selected':''}>10 km</option><option value="20" ${radius===20?'selected':''}>20 km</option><option value="30" ${radius===30?'selected':''}>30 km</option><option value="50" ${radius===50?'selected':''}>50 km</option><option value="100" ${radius===100?'selected':''}>100 km</option></select></label><span class="meta">${list.length} điểm phù hợp</span></div>
       <div class="grid" style="margin-top:10px">${cards}</div>`;
   };
   window.setDiscoveryCategory=c=>{active=c;renderDiscovery(document.getElementById('search')?.value.toLowerCase().trim()||'')};
-  window.setDiscoveryRadius=v=>{radius=Number(v)||50;renderDiscovery(document.getElementById('search')?.value.toLowerCase().trim()||'')};
+  window.setDiscoveryRadius=v=>{radius=Number(v)||50;localStorage.setItem('d1-discovery-radius',String(radius));renderDiscovery(document.getElementById('search')?.value.toLowerCase().trim()||'')};
 
   const priorRender=window.render;
-  window.render=function(){
+  window.render=function renderWithDiscovery(){
     const q=document.getElementById('search')?.value.toLowerCase().trim()||'';
-    document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===window.view));
-    document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===window.view));
-    if(window.view==='discovery'){
+    document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+    document.querySelectorAll('[data-nav]').forEach(b=>b.classList.toggle('active',b.dataset.nav===view));
+    if(view==='discovery'){
       renderDiscovery(q);
-      updateHero?.();
+      updateHero();
       return;
     }
     priorRender();
   };
 
   document.querySelectorAll('[data-view="discovery"],[data-nav="discovery"]').forEach(b=>{
-    b.onclick=()=>{window.view='discovery';window.render()};
+    b.onclick=()=>{view='discovery';window.render()};
   });
 })();
