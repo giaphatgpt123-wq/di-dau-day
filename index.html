@@ -1,1 +1,61 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#075e54"><meta http-equiv="refresh" content="2;url=https://di-dau-day-a1-mobile.giaphatgpt123.chatgpt.site/install.html"><title>Đi Đâu Đây A1 RC5.1</title><style>*{box-sizing:border-box}body{margin:0;min-height:100svh;display:grid;place-items:center;background:linear-gradient(145deg,#075e54,#0b806d);font-family:system-ui;color:#15352f;padding:18px}.card{width:min(440px,100%);background:#fff;border-radius:26px;padding:28px;text-align:center;box-shadow:0 20px 50px #002c2544}h1{margin:8px 0;font-size:1.6rem}p{color:#61736e;line-height:1.5}.badge{display:inline-block;padding:6px 10px;border-radius:999px;background:#e3f4ef;color:#075e54;font-weight:800;font-size:.8rem}a{display:flex;min-height:54px;align-items:center;justify-content:center;background:#075e54;color:#fff;border-radius:15px;text-decoration:none;font-weight:900;margin-top:18px}</style></head><body><main class="card"><span class="badge">A1-RC5.2 · BẢN CHÍNH THỨC</span><h1>Đi Đâu Đây A1</h1><p>Dữ liệu mẫu đã được loại bỏ. Đang chuyển đến trang cài đặt có đăng nhập, GPS, tuyến đường, thư viện và quản trị tài khoản.</p><a href="https://di-dau-day-a1-mobile.giaphatgpt123.chatgpt.site/install.html">Mở trang cài đặt</a></main></body></html>
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#163d2a">
+  <meta name="description" content="Đi Đâu Đây D1 - PWA du lịch đường dài, GPS, tuyến, thư viện địa điểm và quản trị cục bộ.">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="styles.css">
+  <title>Đi Đâu Đây D1</title>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="brand">Đi Đâu Đây<small>D1 · RC2 Repo-first</small></div>
+      <button id="accountBtn" class="pill" type="button">Tài khoản</button>
+    </header>
+
+    <section class="hero">
+      <button id="gpsBtn" class="gps" type="button" aria-label="Lấy vị trí hiện tại" title="Vị trí hiện tại">⌖</button>
+      <small>TUYẾN ĐANG CHỌN</small>
+      <h1 id="routeTitle">Đang nạp tuyến…</h1>
+      <p id="routeInfo">Đang nạp dữ liệu tuyến.</p>
+
+      <div class="gpsbox" aria-live="polite">
+        <div class="gpsline"><span id="gpsStatus">GPS: chưa bật</span><span id="gpsAccuracy">Sai số: —</span></div>
+        <div class="gpsline"><span id="gpsMotion">Tốc độ: — · Hướng: —</span><span id="gpsAge">Tuổi mẫu: —</span></div>
+        <div id="routeDetect" class="detect">Map matching: chờ GPS và dữ liệu geometry/trace được duyệt.</div>
+      </div>
+
+      <div id="installBox" class="install">
+        <b>Cài ứng dụng</b>
+        <p id="installMsg" class="meta">Đang kiểm tra khả năng cài PWA.</p>
+        <button id="installBtn" class="primary" type="button">Cài ứng dụng</button>
+      </div>
+    </section>
+
+    <div class="tabs" aria-label="Chức năng chính">
+      <button type="button" data-view="routes" class="active">Tuyến đường</button>
+      <button type="button" data-view="geometry">GPS / Geometry</button>
+      <button type="button" data-view="library">Thư viện</button>
+      <button type="button" data-view="admin">Admin</button>
+    </div>
+
+    <div class="search"><input id="search" type="search" autocomplete="off" placeholder="Tìm tuyến, đoạn đường, địa điểm…"></div>
+    <main id="main"><div class="panel">Đang nạp dữ liệu…</div></main>
+  </div>
+
+  <nav class="nav" aria-label="Điều hướng dưới">
+    <button type="button" data-nav="routes" class="active">Tuyến</button>
+    <button type="button" data-nav="library">Thư viện</button>
+    <button type="button" data-nav="admin">Admin</button>
+    <button type="button" data-nav="account">Tài khoản</button>
+  </nav>
+
+  <div id="modal"></div>
+  <script src="app.js" defer></script>
+</body>
+</html>
