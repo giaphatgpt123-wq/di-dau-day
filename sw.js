@@ -1,11 +1,12 @@
-const CACHE_VERSION='d1-rc2-shell-v2';
-const RUNTIME_CACHE='d1-rc2-runtime-v2';
+const CACHE_VERSION='d1-rc2-shell-v3';
+const RUNTIME_CACHE='d1-rc2-runtime-v3';
 const APP_SHELL=[
   './',
   './index.html',
   './styles.css',
   './app.js',
   './rc2-core.js',
+  './rc2-discovery.js',
   './manifest.webmanifest',
   './install-qr.png',
   './icons/icon.svg',
@@ -15,51 +16,7 @@ const APP_SHELL=[
   './data/routes-pdh.json',
   './data/geometry-pdh.json'
 ];
-
-self.addEventListener('install',event=>{
-  event.waitUntil(caches.open(CACHE_VERSION).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()));
-});
-
-self.addEventListener('activate',event=>{
-  event.waitUntil(
-    caches.keys()
-      .then(keys=>Promise.all(keys.filter(key=>key!==CACHE_VERSION&&key!==RUNTIME_CACHE).map(key=>caches.delete(key))))
-      .then(()=>self.clients.claim())
-  );
-});
-
-self.addEventListener('message',event=>{
-  if(event.data&&event.data.type==='SKIP_WAITING') self.skipWaiting();
-});
-
-self.addEventListener('fetch',event=>{
-  const request=event.request;
-  if(request.method!=='GET') return;
-  const url=new URL(request.url);
-
-  if(request.mode==='navigate'){
-    event.respondWith(
-      fetch(request)
-        .then(response=>{
-          const copy=response.clone();
-          caches.open(RUNTIME_CACHE).then(cache=>cache.put(request,copy));
-          return response;
-        })
-        .catch(()=>caches.match('./index.html'))
-    );
-    return;
-  }
-
-  if(url.origin===location.origin){
-    event.respondWith(
-      caches.match(request).then(cached=>{
-        const network=fetch(request).then(response=>{
-          const copy=response.clone();
-          caches.open(RUNTIME_CACHE).then(cache=>cache.put(request,copy));
-          return response;
-        }).catch(()=>cached);
-        return cached||network;
-      })
-    );
-  }
-});
+self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_VERSION).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()))});
+self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_VERSION&&key!==RUNTIME_CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
+self.addEventListener('message',event=>{if(event.data&&event.data.type==='SKIP_WAITING')self.skipWaiting()});
+self.addEventListener('fetch',event=>{const request=event.request;if(request.method!=='GET')return;const url=new URL(request.url);if(request.mode==='navigate'){event.respondWith(fetch(request).then(response=>{const copy=response.clone();caches.open(RUNTIME_CACHE).then(cache=>cache.put(request,copy));return response}).catch(()=>caches.match('./index.html')));return}if(url.origin===location.origin){event.respondWith(caches.match(request).then(cached=>{const network=fetch(request).then(response=>{const copy=response.clone();caches.open(RUNTIME_CACHE).then(cache=>cache.put(request,copy));return response}).catch(()=>cached);return cached||network}))}});
