@@ -14,7 +14,7 @@
 <body>
   <div class="app">
     <header class="top">
-      <div class="brand">Đi Đâu Đây<small>D1 · RC2 Core</small></div>
+      <div class="brand">Đi Đâu Đây<small>D1 · RC2 Discovery</small></div>
       <button id="accountBtn" class="pill" type="button">Tài khoản</button>
     </header>
 
@@ -38,6 +38,7 @@
     </section>
 
     <div class="tabs" aria-label="Chức năng chính">
+      <button type="button" data-view="discovery">Khám phá</button>
       <button type="button" data-view="routes" class="active">Tuyến đường</button>
       <button type="button" data-view="geometry">GPS / Geometry</button>
       <button type="button" data-view="library">Thư viện</button>
@@ -49,6 +50,7 @@
   </div>
 
   <nav class="nav" aria-label="Điều hướng dưới">
+    <button type="button" data-nav="discovery">Khám phá</button>
     <button type="button" data-nav="routes" class="active">Tuyến</button>
     <button type="button" data-nav="library">Thư viện</button>
     <button type="button" data-nav="admin">Admin</button>
@@ -58,5 +60,6 @@
   <div id="modal"></div>
   <script src="app.js" defer></script>
   <script src="rc2-core.js" defer></script>
+  <script src="rc2-discovery.js" defer></script>
 </body>
 </html>
