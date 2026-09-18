@@ -52,7 +52,7 @@ android {
     }
 }
 
-tasks.register('verifyReleaseSigning') {
+def verifyReleaseSigningTask = tasks.register('verifyReleaseSigning') {
     doLast {
         if (!releaseSigningReady) {
             throw new GradleException('Release signing variables are missing. Use GitHub Actions secrets; never commit the keystore to this public repository.')
@@ -60,12 +60,18 @@ tasks.register('verifyReleaseSigning') {
     }
 }
 
-tasks.named('assembleRelease').configure { dependsOn 'verifyReleaseSigning' }
+tasks.configureEach { task ->
+    if (task.name == 'assembleRelease') {
+        task.dependsOn verifyReleaseSigningTask
+    }
+}
 
 tasks.register('syncWebAssets', Copy) {
     from(rootProject.projectDir.parentFile) {
         include 'index.html'
         include 'app.js'
+        include 'rc2-core.js'
+        include 'rc2-discovery.js'
         include 'styles.css'
         include 'manifest.webmanifest'
         include 'data/**'

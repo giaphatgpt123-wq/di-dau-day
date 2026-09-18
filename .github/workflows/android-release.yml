@@ -1,11 +1,10 @@
-name: Build Signed Android Release
+name: Build Signed Android Release RC2
 
 on:
   workflow_dispatch:
   push:
-    branches: ["main"]
-    paths:
-      - ".github/workflows/android-release.yml"
+    tags:
+      - "android-v*"
 
 permissions:
   contents: read
@@ -23,16 +22,36 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android 35 SDK
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Prepare Android SDK 35
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "${ANDROID_HOME:-}"
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -perm -u+x | head -n 1)"
+          test -n "$SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+
+      - name: Validate web bundle inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s index.html
+          test -s app.js
+          test -s rc2-core.js
+          test -s rc2-discovery.js
+          test -s data/routes-pdh.json
+          test -s data/geometry-pdh.json
+          node --check app.js
+          node --check rc2-core.js
+          node --check rc2-discovery.js
+          grep -q "include 'rc2-core.js'" android/app/build.gradle
+          grep -q "include 'rc2-discovery.js'" android/app/build.gradle
 
       - name: Validate signing secrets
         shell: bash
@@ -59,6 +78,15 @@ jobs:
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: gradle -p android --no-daemon :app:assembleRelease
 
+      - name: Verify bundled offline web assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s android/app/src/main/assets/www/index.html
+          test -s android/app/src/main/assets/www/app.js
+          test -s android/app/src/main/assets/www/rc2-core.js
+          test -s android/app/src/main/assets/www/rc2-discovery.js
+
       - name: Verify APK signature and package
         shell: bash
         run: |
@@ -69,22 +97,20 @@ jobs:
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | tee apk-badging.txt
           grep -q "package: name='com.pdhtravel.didauday' versionCode='151' versionName='1.5.1'" apk-badging.txt
 
-      - name: Prepare single signed installer
+      - name: Prepare signed installer
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp android/app/build/outputs/apk/release/app-release.apk dist/Di-Dau-Day-D1-1.5.1-release.apk
-          sha256sum dist/Di-Dau-Day-D1-1.5.1-release.apk | tee dist/Di-Dau-Day-D1-1.5.1-release.apk.sha256
+          cp android/app/build/outputs/apk/release/app-release.apk dist/Di-Dau-Day-D1-RC2-release.apk
+          sha256sum dist/Di-Dau-Day-D1-RC2-release.apk | tee dist/Di-Dau-Day-D1-RC2-release.apk.sha256
 
       - name: Upload signed APK
         uses: actions/upload-artifact@v4
         with:
-          name: Di-Dau-Day-D1-1.5.1-RELEASE
+          name: Di-Dau-Day-D1-RC2-RELEASE
           path: |
-            dist/Di-Dau-Day-D1-1.5.1-release.apk
-            dist/Di-Dau-Day-D1-1.5.1-release.apk.sha256
+            dist/Di-Dau-Day-D1-RC2-release.apk
+            dist/Di-Dau-Day-D1-RC2-release.apk.sha256
           if-no-files-found: error
           retention-days: 90
-
-# rerun marker: 2026-09-11 signing secrets validation
