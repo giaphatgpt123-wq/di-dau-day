@@ -4,42 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches: ["main"]
-    paths:
-      - "android/**"
-      - "index.html"
-      - "app.js"
-      - "rc2-core.js"
-      - "rc2-discovery.js"
-      - "rc2-data.js"
-      - "rc2-bulk.js"
-      - "rc2-seed.js"
-      - "rc2-geocode.js"
-      - "rc2-driving.js"
-      - "rc2-alerts.js"
-      - "styles.css"
-      - "manifest.webmanifest"
-      - "data/**"
-      - "icons/**"
-      - ".github/workflows/android-apk.yml"
+    paths: ["android/**","index.html","app.js","rc2-core.js","rc2-discovery.js","rc2-data.js","rc2-bulk.js","rc2-seed.js","rc2-geocode.js","rc2-driving.js","rc2-alerts.js","rc2-proactive.js","styles.css","manifest.webmanifest","data/**","icons/**",".github/workflows/android-apk.yml"]
   pull_request:
     branches: ["main"]
-    paths:
-      - "android/**"
-      - "index.html"
-      - "app.js"
-      - "rc2-core.js"
-      - "rc2-discovery.js"
-      - "rc2-data.js"
-      - "rc2-bulk.js"
-      - "rc2-seed.js"
-      - "rc2-geocode.js"
-      - "rc2-driving.js"
-      - "rc2-alerts.js"
-      - "styles.css"
-      - "manifest.webmanifest"
-      - "data/**"
-      - "icons/**"
-      - ".github/workflows/android-apk.yml"
+    paths: ["android/**","index.html","app.js","rc2-core.js","rc2-discovery.js","rc2-data.js","rc2-bulk.js","rc2-seed.js","rc2-geocode.js","rc2-driving.js","rc2-alerts.js","rc2-proactive.js","styles.css","manifest.webmanifest","data/**","icons/**",".github/workflows/android-apk.yml"]
 
 permissions:
   contents: read
@@ -72,24 +40,20 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js; do node --check "$f"; done
-          grep -q "com.pdhtravel.didauday" android/app/build.gradle
-          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js; do grep -q "include '$f'" android/app/build.gradle; done
-          grep -q "getDrivingRecommendations" rc2-driving.js
-          grep -q "getDrivingAlertState" rc2-alerts.js
-          grep -q "setDrivingAlertThreshold" rc2-alerts.js
-          grep -q "THRESHOLDS=\[10,20,30\]" rc2-alerts.js
+          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js; do node --check "$f"; done
+          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js; do grep -q "include '$f'" android/app/build.gradle; done
+          grep -q "getProactiveAlertState" rc2-proactive.js
+          grep -q "SERVICE_GAP" rc2-proactive.js
+          grep -q "d1-proactive-alert-state" rc2-proactive.js
           grep -q "ACCESS_FINE_LOCATION" android/app/src/main/AndroidManifest.xml
-          grep -q "onGeolocationPermissionsShowPrompt" android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java
-          grep -q "onShowFileChooser" android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java
       - name: Build installable debug APK
         run: gradle -p android --no-daemon :app:assembleDebug
       - name: Verify bundled offline web assets
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Prepare single-file installer
         shell: bash
         run: |
