@@ -11,7 +11,7 @@ let poiData=[
 const context={console,Math,JSON,Number,String,Boolean,localStorage,lastFix:{lat:10,lng:106,accuracy:10,speed:0,heading:null,at:Date.now()},window:null,pois:()=>poiData};
 context.window=context;vm.createContext(context);
 vm.runInContext(fs.readFileSync('rc2-engine-v3.js','utf8'),context,{filename:'rc2-engine-v3.js'});
-assert.equal(context.DiDauEngine.version,'3.0.0-rc2');
+assert.equal(context.DiDauEngine.version,'3.1.0-rc2');
 localStorage.setItem('d1-route','R-002');
 let rec=context.DiDauEngine.DrivingAdvisor.recommendations();
 assert(rec.items.some(x=>x.id==='r2-fuel'));
@@ -25,4 +25,4 @@ assert.equal(rec.routeContext.routeId,'R-X');
 const driving=fs.readFileSync('rc2-driving.js','utf8');
 assert(!driving.includes("p.routeId==='R-002'"));
 assert(driving.includes('DiDauEngine'));
-console.log('CORE ENGINE V3 MULTI-ROUTE ARCHITECTURE: PASS');
+console.log('CORE ENGINE V3.1 MULTI-ROUTE ARCHITECTURE: PASS');
