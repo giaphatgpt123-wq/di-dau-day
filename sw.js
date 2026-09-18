@@ -1,7 +1,7 @@
-const CACHE_VERSION='d1-rc2-shell-v4';
-const RUNTIME_CACHE='d1-rc2-runtime-v4';
+const CACHE_VERSION='d1-rc2-shell-v5';
+const RUNTIME_CACHE='d1-rc2-runtime-v5';
 const APP_SHELL=[
-  './','./index.html','./styles.css','./app.js','./rc2-core.js','./rc2-discovery.js','./rc2-data.js','./manifest.webmanifest','./install-qr.png','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./data/routes-pdh.json','./data/geometry-pdh.json'
+  './','./index.html','./styles.css','./app.js','./rc2-core.js','./rc2-discovery.js','./rc2-data.js','./rc2-bulk.js','./manifest.webmanifest','./install-qr.png','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./data/routes-pdh.json','./data/geometry-pdh.json'
 ];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_VERSION).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_VERSION&&key!==RUNTIME_CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});

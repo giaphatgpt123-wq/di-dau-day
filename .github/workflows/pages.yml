@@ -26,11 +26,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
           node --check app.js
           node --check rc2-core.js
           node --check rc2-discovery.js
           node --check rc2-data.js
+          node --check rc2-bulk.js
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
@@ -38,20 +39,23 @@ jobs:
           core=Path('rc2-core.js').read_text(encoding='utf-8')
           discovery=Path('rc2-discovery.js').read_text(encoding='utf-8')
           data=Path('rc2-data.js').read_text(encoding='utf-8')
+          bulk=Path('rc2-bulk.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
           manifest=Path('manifest.webmanifest').read_text(encoding='utf-8')
           required_ids=['accountBtn','gpsBtn','routeTitle','routeInfo','gpsStatus','gpsAccuracy','gpsMotion','gpsAge','routeDetect','installBox','installMsg','installBtn','search','main','modal']
           for item in required_ids: assert f'id="{item}"' in html, f'missing DOM id: {item}'
-          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js']: assert f'<script src="{script}" defer></script>' in html
+          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js']: assert f'<script src="{script}" defer></script>' in html
           assert 'data-view="discovery"' in html and 'data-nav="discovery"' in html
           assert 'http-equiv="refresh"' not in html.lower()
           assert "serviceWorker.register('./sw.js')" in app
-          for asset in ["'./app.js'","'./rc2-core.js'","'./rc2-discovery.js'","'./rc2-data.js'","'./styles.css'"]: assert asset in sw
+          for asset in ["'./app.js'","'./rc2-core.js'","'./rc2-discovery.js'","'./rc2-data.js'","'./rc2-bulk.js'","'./styles.css'"]: assert asset in sw
           assert 'd1-gps-tracking' in core and 'adminCreateUser' in core
           assert 'Khám phá quanh tôi' in discovery and 'd1-discovery-radius' in discovery
           for token in ['POI_DEDUP_MERGED','POI_SCHEMA_MIGRATED','SOURCE_IMPORTED','saveNormalizedPoi','suggestRoute']: assert token in data
+          for token in ['parseCsv','previewBulkImport','commitBulkImport','downloadBulkTemplate','POI_BULK_IMPORTED','MAX_ROWS']: assert token in bulk
+          assert 'verified:false' in bulk and "verificationStatus:'SOURCE_IMPORTED'" in bulk
           assert '"display":"standalone"' in manifest.replace(' ', '')
-          print('D1 RC2 DATA GATE: PASS')
+          print('D1 RC2 BULK DATA GATE: PASS')
           PY
 
   deploy:
