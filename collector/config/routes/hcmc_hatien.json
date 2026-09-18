@@ -1,0 +1,21 @@
+{
+  "route_id": "HCMC-HA-TIEN",
+  "name": "TPHCM → Hà Tiên",
+  "corridor_km": 30,
+  "regions": [
+    "TPHCM",
+    "Long An",
+    "Tiền Giang",
+    "Đồng Tháp",
+    "An Giang",
+    "Kiên Giang"
+  ],
+  "priority_categories": [
+    "FOOD",
+    "LODGING",
+    "ATTRACTION",
+    "COFFEE",
+    "FUEL"
+  ],
+  "status": "PILOT"
+}
