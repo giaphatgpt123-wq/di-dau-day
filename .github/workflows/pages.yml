@@ -35,7 +35,7 @@ jobs:
           sw=Path('sw.js').read_text(encoding='utf-8')
           assert '<script src="rc2-unified-driving-ui.js" defer></script>' in html
           assert "'./rc2-unified-driving-ui.js'" in sw
-          for token in ['renderUnifiedDrivingUI','data-unified-driving-ui','SPEED_MOVING_KMH=5.4','Xem chi tiết','Chế độ lái xe','data-technical-panel']: assert token in ui
+          for token in ['renderUnifiedDrivingUI','dataset.unifiedDrivingUi','SPEED_MOVING_KMH=5.4','Xem chi tiết','Chế độ lái xe','dataset.technicalPanel']: assert token in ui
           print('D1 RC2 R002 B11 UNIFIED UI GATE: PASS')
           PY
 
