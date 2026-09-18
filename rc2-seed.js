@@ -2,7 +2,8 @@
   'use strict';
   const PACKS={
     hatien:{url:'./data/seed-ha-tien.json',label:'Lô Hà Tiên'},
-    corridor:{url:'./data/seed-r002-corridor.json',label:'Lô hành lang R-002'}
+    corridor:{url:'./data/seed-r002-corridor.json',label:'Lô hành lang R-002'},
+    b2:{url:'./data/seed-r002-b2.json',label:'Lô R-002 B2 ăn uống & nhiên liệu'}
   };
 
   async function loadPack(key){
@@ -33,6 +34,7 @@
 
   window.importHaTienSeed=()=>importSeed('hatien');
   window.importR002CorridorSeed=()=>importSeed('corridor');
+  window.importR002B2Seed=()=>importSeed('b2');
 
   const priorRender=window.render;
   window.render=function renderWithSeed(){
@@ -41,18 +43,18 @@
     const heading=[...document.querySelectorAll('#main h2')].find(x=>x.textContent.includes('Thư viện'));
     const actions=heading?.parentElement?.querySelector('.actions');
     if(!actions)return;
-    if(!actions.querySelector('[data-seed-ha-tien]')){
+    const buttons=[
+      ['seedHaTien','Nạp lô Hà Tiên',importHaTienSeed],
+      ['seedR002Corridor','Nạp hành lang R-002',importR002CorridorSeed],
+      ['seedR002B2','Nạp R-002 B2 ăn/xăng',importR002B2Seed]
+    ];
+    for(const [key,label,handler] of buttons){
+      const attr=`data-${key.replace(/[A-Z]/g,m=>'-'+m.toLowerCase())}`;
+      if(actions.querySelector(`[${attr}]`)) continue;
       const b=document.createElement('button');
-      b.dataset.seedHaTien='1';
-      b.textContent='Nạp lô Hà Tiên';
-      b.onclick=importHaTienSeed;
-      actions.appendChild(b);
-    }
-    if(!actions.querySelector('[data-seed-r002-corridor]')){
-      const b=document.createElement('button');
-      b.dataset.seedR002Corridor='1';
-      b.textContent='Nạp hành lang R-002';
-      b.onclick=importR002CorridorSeed;
+      b.dataset[key]='1';
+      b.textContent=label;
+      b.onclick=handler;
       actions.appendChild(b);
     }
   };
