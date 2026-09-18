@@ -66,7 +66,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/seed-ha-tien.json; do test -s "$f"; done
+          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/seed-ha-tien.json data/seed-r002-corridor.json; do test -s "$f"; done
           node --check app.js
           node --check rc2-core.js
           node --check rc2-discovery.js
@@ -84,7 +84,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Prepare single-file installer
         shell: bash
         run: |
