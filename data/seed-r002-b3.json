@@ -1,0 +1,59 @@
+{
+  "schema": 1,
+  "pack": "R002-B3-2026-09",
+  "routeId": "R-002",
+  "region": "Tây Nam Bộ",
+  "note": "B3 bổ sung điểm ăn/điểm dịch vụ nguồn chính thức; không gán tọa độ ước lượng.",
+  "pois": [
+    {
+      "name": "Nhà hàng Năm Nhỏ",
+      "category": "Quán ăn",
+      "subcategory": "Nhà hàng",
+      "address": "D7 Lô 35-41 Tôn Đức Thắng, Rạch Giá",
+      "phone": "0296 0913885018",
+      "note": "CSDL ngành Du lịch ghi nhận nhà hàng tại khu đô thị lấn biển Rạch Giá.",
+      "routeId": "R-002",
+      "region": "Tây Nam Bộ",
+      "sourceType": "official_tourism_db",
+      "sourceLabel": "CSDL ngành Du lịch",
+      "sourceUrl": "https://csdl.vietnamtourism.gov.vn/rest/?item=199",
+      "verificationStatus": "SOURCE_IMPORTED",
+      "verified": false,
+      "geocodeStatus": "ADDRESS_ONLY_NEEDS_GEOCODE",
+      "gpsRankEligible": false
+    },
+    {
+      "name": "GO! Mỹ Tho",
+      "category": "Trạm dừng",
+      "subcategory": "Điểm dịch vụ - ăn uống - mua sắm",
+      "address": "545 Lê Văn Phẩm, Đạo Thạnh, Mỹ Tho",
+      "phone": "0277 3878 011",
+      "note": "CSDL ngành Du lịch mô tả tổ hợp mua sắm, ăn uống và vui chơi; dùng như điểm dịch vụ đô thị, không phải trạm dừng đường bộ chuyên dụng.",
+      "routeId": "R-002",
+      "region": "Tây Nam Bộ",
+      "sourceType": "official_tourism_db",
+      "sourceLabel": "CSDL ngành Du lịch",
+      "sourceUrl": "https://csdl.vietnamtourism.gov.vn/shop/?item=556",
+      "verificationStatus": "SOURCE_IMPORTED",
+      "verified": false,
+      "geocodeStatus": "ADDRESS_ONLY_NEEDS_GEOCODE",
+      "gpsRankEligible": false
+    },
+    {
+      "name": "Chợ Mỹ Tho",
+      "category": "Ăn uống",
+      "subcategory": "Chợ - đặc sản địa phương",
+      "address": "18 Nguyễn Huệ, Mỹ Tho",
+      "note": "CSDL ngành Du lịch ghi nhận Chợ Mỹ Tho tại 18 Nguyễn Huệ; dùng như điểm tìm ẩm thực/đặc sản địa phương.",
+      "routeId": "R-002",
+      "region": "Tây Nam Bộ",
+      "sourceType": "official_tourism_db",
+      "sourceLabel": "CSDL ngành Du lịch",
+      "sourceUrl": "https://csdl.vietnamtourism.gov.vn/shop/?item=551",
+      "verificationStatus": "SOURCE_IMPORTED",
+      "verified": false,
+      "geocodeStatus": "ADDRESS_ONLY_NEEDS_GEOCODE",
+      "gpsRankEligible": false
+    }
+  ]
+}
