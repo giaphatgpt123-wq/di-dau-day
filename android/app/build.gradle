@@ -62,6 +62,7 @@ tasks.register('syncWebAssets', Copy) {
         include 'index.html'
         include 'rc2-app-services-v3.js'
         include 'app.js'
+        include 'rc2-route-geometry-domain-v3.js'
         include 'rc2-core.js'
         include 'rc2-discovery.js'
         include 'rc2-data.js'
