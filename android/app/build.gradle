@@ -78,6 +78,8 @@ tasks.register('syncWebAssets', Copy) {
         include 'rc2-trip-status.js'
         include 'rc2-driving-mode.js'
         include 'rc2-unified-driving-ui.js'
+        include 'rc2-ui-shell-v3.js'
+        include 'rc2-bootstrap-v3.js'
         include 'styles.css'
         include 'manifest.webmanifest'
         include 'data/**'
