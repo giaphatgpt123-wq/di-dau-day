@@ -37,7 +37,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json; do test -s "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json; do test -s "$f"; done
           node --check app.js
           node --check rc2-core.js
           node --check rc2-discovery.js
@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/seed-ha-tien.json data/seed-r002-corridor.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Verify APK signature and package
         shell: bash
         run: |
