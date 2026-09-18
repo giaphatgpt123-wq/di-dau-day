@@ -66,6 +66,7 @@ tasks.register('syncWebAssets', Copy) {
         include 'rc2-data.js'
         include 'rc2-bulk.js'
         include 'rc2-seed.js'
+        include 'rc2-geocode.js'
         include 'styles.css'
         include 'manifest.webmanifest'
         include 'data/**'
