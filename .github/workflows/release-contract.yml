@@ -1,0 +1,46 @@
+name: Validate Android Release Contract
+
+on:
+  pull_request:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/android-release.yml"
+      - ".github/workflows/release-contract.yml"
+      - "android/app/build.gradle"
+      - "app.js"
+  push:
+    branches: ["main"]
+    paths:
+      - ".github/workflows/android-release.yml"
+      - ".github/workflows/release-contract.yml"
+      - "android/app/build.gradle"
+      - "app.js"
+
+permissions:
+  contents: read
+
+jobs:
+  validate-release-contract:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate permanent GitHub Release pipeline
+        shell: bash
+        run: |
+          set -euo pipefail
+          WF=.github/workflows/android-release.yml
+          test -s "$WF"
+          grep -q 'contents: write' "$WF"
+          grep -q 'android-v2.0.0' "$WF"
+          grep -q 'EXPECTED_VERSION: "2.0.0"' "$WF"
+          grep -q 'EXPECTED_VERSION_CODE: "200"' "$WF"
+          grep -q 'ANDROID_KEYSTORE_BASE64' "$WF"
+          grep -q 'apksigner' "$WF"
+          grep -q 'Di-Dau-Day-latest.apk' "$WF"
+          grep -q 'sha256sum' "$WF"
+          grep -q 'gh release create' "$WF"
+          grep -q 'gh release upload' "$WF"
+          grep -q "versionCode 200" android/app/build.gradle
+          grep -q "versionName '2.0.0'" android/app/build.gradle
+          grep -q "APP_VERSION='D1-RC2.0.0'" app.js
+          echo 'ANDROID GITHUB RELEASE CONTRACT: PASS'

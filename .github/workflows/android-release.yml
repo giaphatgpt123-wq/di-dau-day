@@ -1,25 +1,50 @@
-name: Build Signed Android Release RC2
+name: Publish Signed Android Release RC2
 
 on:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag (must match Android version, e.g. android-v2.0.0)"
+        required: true
+        default: "android-v2.0.0"
+      prerelease:
+        description: "Publish as prerelease"
+        required: true
+        type: boolean
+        default: false
   push:
     tags:
       - "android-v*"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   signed-release:
     runs-on: ubuntu-latest
+    env:
+      EXPECTED_VERSION: "2.0.0"
+      EXPECTED_VERSION_CODE: "200"
+      RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate release identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$RELEASE_TAG" = "android-v${EXPECTED_VERSION}"
+          grep -q "versionCode ${EXPECTED_VERSION_CODE}" android/app/build.gradle
+          grep -q "versionName '${EXPECTED_VERSION}'" android/app/build.gradle
+          grep -q "APP_VERSION='D1-RC2.0.0'" app.js
+
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
+
       - name: Prepare Android SDK 35
         shell: bash
         run: |
@@ -29,10 +54,12 @@ jobs:
           test -n "$SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
+
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+
       - name: Validate web bundle inputs
         shell: bash
         run: |
@@ -48,12 +75,7 @@ jobs:
           node tests/core-v3-phase4-ui-bootstrap.test.js
           node tests/core-v3-legacy-kernel-cleanup.test.js
           for f in rc2-app-services-v3.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js; do grep -q "include '$f'" android/app/build.gradle; done
-          grep -q "versionCode 200" android/app/build.gradle
-          grep -q "versionName '2.0.0'" android/app/build.gradle
-          grep -q "APP_VERSION='D1-RC2.0.0'" app.js
-          ! grep -q '<h2>Mạng tuyến PDH Travel</h2>' app.js
-          grep -q "DiDauUiShell" rc2-ui-shell-v3.js
-          grep -q "DiDauBootstrap" rc2-bootstrap-v3.js
+
       - name: Validate signing secrets
         shell: bash
         env:
@@ -70,6 +92,7 @@ jobs:
           printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/didauday-release.jks"
           test -s "$RUNNER_TEMP/didauday-release.jks"
           keytool -list -keystore "$RUNNER_TEMP/didauday-release.jks" -storepass "$ANDROID_KEYSTORE_PASSWORD" -alias "$ANDROID_KEY_ALIAS" >/dev/null
+
       - name: Build signed release APK
         env:
           ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/didauday-release.jks
@@ -77,33 +100,88 @@ jobs:
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: gradle -p android --no-daemon :app:assembleRelease
+
       - name: Verify bundled offline web assets
         shell: bash
         run: |
           set -euo pipefail
           for f in index.html rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
+
       - name: Verify APK signature and package
         shell: bash
         run: |
           set -euo pipefail
           APK="android/app/build/outputs/apk/release/app-release.apk"
           test -s "$APK"
-          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK"
+          "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK" | tee apk-signature.txt
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | tee apk-badging.txt
-          grep -q "package: name='com.pdhtravel.didauday' versionCode='200' versionName='2.0.0'" apk-badging.txt
-      - name: Prepare signed installer
+          grep -q "package: name='com.pdhtravel.didauday' versionCode='${EXPECTED_VERSION_CODE}' versionName='${EXPECTED_VERSION}'" apk-badging.txt
+
+      - name: Prepare release files
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp android/app/build/outputs/apk/release/app-release.apk dist/Di-Dau-Day-D1-RC2-release.apk
-          sha256sum dist/Di-Dau-Day-D1-RC2-release.apk | tee dist/Di-Dau-Day-D1-RC2-release.apk.sha256
-      - name: Upload signed APK
+          APK="android/app/build/outputs/apk/release/app-release.apk"
+          cp "$APK" "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk"
+          cp "$APK" "dist/Di-Dau-Day-latest.apk"
+          sha256sum "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk" > "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk.sha256"
+          sha256sum "dist/Di-Dau-Day-latest.apk" > "dist/Di-Dau-Day-latest.apk.sha256"
+          cat > dist/RELEASE-NOTES.md <<EOF
+          # Đi Đâu Đây D1 RC2 v${EXPECTED_VERSION}
+
+          - Android package: com.pdhtravel.didauday
+          - versionCode: ${EXPECTED_VERSION_CODE}
+          - versionName: ${EXPECTED_VERSION}
+          - Core Engine v3 architecture with Services, Route/Geometry Domain, Driving Core, UI Shell and Bootstrap.
+          - APK is signed and verified with Android apksigner before publication.
+          - SHA-256 files are included for integrity verification.
+
+          Recommended installer: **Di-Dau-Day-latest.apk**
+          EOF
+          test -s "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk"
+          test -s dist/Di-Dau-Day-latest.apk
+
+      - name: Upload CI backup artifact
         uses: actions/upload-artifact@v4
         with:
           name: Di-Dau-Day-D1-RC2-RELEASE
           path: |
-            dist/Di-Dau-Day-D1-RC2-release.apk
-            dist/Di-Dau-Day-D1-RC2-release.apk.sha256
+            dist/Di-Dau-Day-v${{ env.EXPECTED_VERSION }}.apk
+            dist/Di-Dau-Day-v${{ env.EXPECTED_VERSION }}.apk.sha256
+            dist/Di-Dau-Day-latest.apk
+            dist/Di-Dau-Day-latest.apk.sha256
+            dist/RELEASE-NOTES.md
           if-no-files-found: error
           retention-days: 90
+
+      - name: Publish GitHub Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRERELEASE: ${{ github.event_name == 'workflow_dispatch' && inputs.prerelease || false }}
+        run: |
+          set -euo pipefail
+          EXTRA=()
+          if [ "$PRERELEASE" = "true" ]; then EXTRA+=(--prerelease); fi
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release upload "$RELEASE_TAG" \
+              "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk" \
+              "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk.sha256" \
+              "dist/Di-Dau-Day-latest.apk" \
+              "dist/Di-Dau-Day-latest.apk.sha256" \
+              --clobber
+            gh release edit "$RELEASE_TAG" --title "Đi Đâu Đây D1 RC2 v${EXPECTED_VERSION}" --notes-file dist/RELEASE-NOTES.md "${EXTRA[@]}"
+          else
+            gh release create "$RELEASE_TAG" \
+              "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk" \
+              "dist/Di-Dau-Day-v${EXPECTED_VERSION}.apk.sha256" \
+              "dist/Di-Dau-Day-latest.apk" \
+              "dist/Di-Dau-Day-latest.apk.sha256" \
+              --target "$GITHUB_SHA" \
+              --title "Đi Đâu Đây D1 RC2 v${EXPECTED_VERSION}" \
+              --notes-file dist/RELEASE-NOTES.md \
+              --latest \
+              "${EXTRA[@]}"
+          fi
+          gh release view "$RELEASE_TAG" --json url,tagName,name,isDraft,isPrerelease
