@@ -37,12 +37,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js; do node --check "$f"; done
-          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js; do grep -q "include '$f'" android/app/build.gradle; done
-          grep -q "getDrivingRecommendations" rc2-driving.js
-          grep -q "getDrivingAlertState" rc2-alerts.js
-          grep -q "setDrivingAlertThreshold" rc2-alerts.js
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js; do node --check "$f"; done
+          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js; do grep -q "include '$f'" android/app/build.gradle; done
+          grep -q "getProactiveAlertState" rc2-proactive.js
+          grep -q "SERVICE_GAP" rc2-proactive.js
       - name: Validate signing secrets
         shell: bash
         env:
@@ -70,7 +69,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Verify APK signature and package
         shell: bash
         run: |
