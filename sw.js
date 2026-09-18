@@ -1,7 +1,7 @@
-const CACHE_VERSION='d1-rc2-shell-v14';
-const RUNTIME_CACHE='d1-rc2-runtime-v14';
+const CACHE_VERSION='d1-rc2-shell-v15';
+const RUNTIME_CACHE='d1-rc2-runtime-v15';
 const APP_SHELL=[
-  './','./index.html','./styles.css','./app.js','./rc2-core.js','./rc2-discovery.js','./rc2-data.js','./rc2-bulk.js','./rc2-seed.js','./rc2-geocode.js','./rc2-driving.js','./rc2-alerts.js','./rc2-proactive.js','./rc2-driver-rest.js','./manifest.webmanifest','./install-qr.png','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./data/routes-pdh.json','./data/geometry-pdh.json','./data/seed-ha-tien.json','./data/seed-r002-corridor.json','./data/seed-r002-b2.json','./data/seed-r002-b3.json','./data/seed-r002-b4.json'
+  './','./index.html','./styles.css','./app.js','./rc2-core.js','./rc2-discovery.js','./rc2-data.js','./rc2-bulk.js','./rc2-seed.js','./rc2-geocode.js','./rc2-driving.js','./rc2-alerts.js','./rc2-proactive.js','./rc2-driver-rest.js','./rc2-trip-status.js','./manifest.webmanifest','./install-qr.png','./icons/icon.svg','./icons/icon-192.png','./icons/icon-512.png','./icons/apple-touch-icon.png','./data/routes-pdh.json','./data/geometry-pdh.json','./data/seed-ha-tien.json','./data/seed-r002-corridor.json','./data/seed-r002-b2.json','./data/seed-r002-b3.json','./data/seed-r002-b4.json'
 ];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE_VERSION).then(cache=>cache.addAll(APP_SHELL)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE_VERSION&&key!==RUNTIME_CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()))});
