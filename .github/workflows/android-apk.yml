@@ -40,13 +40,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-gps-health.js rc2-driving.js rc2-driver-rest.js rc2-trip-status.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js; do node --check "$f"; done
+          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-gps-health.js rc2-driving.js rc2-driver-rest.js rc2-trip-status.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js; do node --check "$f"; done
           node tests/b12-simulation.test.js
           node tests/b13-gps-faults.test.js
+          node tests/b14-gps-hysteresis.test.js
           for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js; do grep -q "include '$f'" android/app/build.gradle; done
-          grep -q "STALE_MS=20000" rc2-gps-health.js
-          grep -q "MAX_DRIVING_ACCURACY=120" rc2-gps-health.js
+          grep -q "RECOVERY_GOOD_SAMPLES=3" rc2-gps-health.js
+          grep -q "DIRECTION_GOOD_SAMPLES=3" rc2-gps-health.js
           grep -q "ACCESS_FINE_LOCATION" android/app/src/main/AndroidManifest.xml
       - name: Build installable debug APK
         run: gradle -p android --no-daemon :app:assembleDebug
