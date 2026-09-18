@@ -13,6 +13,7 @@ on:
       - "rc2-data.js"
       - "rc2-bulk.js"
       - "rc2-seed.js"
+      - "rc2-geocode.js"
       - "styles.css"
       - "manifest.webmanifest"
       - "data/**"
@@ -29,6 +30,7 @@ on:
       - "rc2-data.js"
       - "rc2-bulk.js"
       - "rc2-seed.js"
+      - "rc2-geocode.js"
       - "styles.css"
       - "manifest.webmanifest"
       - "data/**"
@@ -66,15 +68,12 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json; do test -s "$f"; done
-          node --check app.js
-          node --check rc2-core.js
-          node --check rc2-discovery.js
-          node --check rc2-data.js
-          node --check rc2-bulk.js
-          node --check rc2-seed.js
+          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js; do node --check "$f"; done
           grep -q "com.pdhtravel.didauday" android/app/build.gradle
-          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js; do grep -q "include '$f'" android/app/build.gradle; done
+          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js; do grep -q "include '$f'" android/app/build.gradle; done
+          grep -q "gpsRankEligible!==false" rc2-discovery.js
+          grep -q "POI_COORDINATE_CONFIRMED" rc2-geocode.js
           grep -q "ACCESS_FINE_LOCATION" android/app/src/main/AndroidManifest.xml
           grep -q "onGeolocationPermissionsShowPrompt" android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java
           grep -q "onShowFileChooser" android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java
@@ -84,7 +83,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Prepare single-file installer
         shell: bash
         run: |
