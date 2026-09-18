@@ -80,6 +80,7 @@ tasks.register('syncWebAssets', Copy) {
         include 'rc2-unified-driving-ui.js'
         include 'rc2-ui-shell-v3.js'
         include 'rc2-bootstrap-v3.js'
+        include 'rc2-install-flow-v3.js'
         include 'styles.css'
         include 'manifest.webmanifest'
         include 'data/**'
