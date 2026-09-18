@@ -1,0 +1,14 @@
+const fs=require('fs');
+const assert=require('assert');
+const src=fs.readFileSync('app.js','utf8');
+assert(src.includes("APP_VERSION='D1-RC2.0.0'"));
+for(const token of ['DiDauServices','DiDauRouteGeometry','DiDauUiShell'])assert(src.includes(token),`missing owner ${token}`);
+assert(src.includes('function routeById(id){return domain()?.RouteDomain?.byId?.(id)'));
+assert(src.includes('function render(){return ui()?.render?.()}'));
+assert(src.includes('function recognizeRoute(f){return domain()?.GeometryDomain?.recognizeRoute?.(f)||null}'));
+assert(!src.includes('<h2>Mạng tuyến PDH Travel</h2>'),'route renderer must live outside app.js');
+assert(!src.includes('function recognizeRoute(f){let candidates=[]'),'route recognition algorithm must live in domain');
+assert(!src.includes('function routeState(r){const eligible='),'route state algorithm must live in domain');
+assert(!src.includes("$('search').oninput=render"),'top-level UI wiring must live in Bootstrap');
+assert(src.length<20000,`legacy kernel too large: ${src.length} bytes`);
+console.log(`CORE V3 LEGACY KERNEL CLEANUP: PASS (${src.length} bytes)`);

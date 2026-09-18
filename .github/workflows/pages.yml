@@ -26,8 +26,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js; do test -s "$f"; done
-          for f in rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js; do node --check "$f"; done
+          for f in index.html rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js; do test -s "$f"; done
+          for f in rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js; do node --check "$f"; done
           node tests/b12-simulation.test.js
           node tests/b13-gps-faults.test.js
           node tests/b14-gps-hysteresis.test.js
@@ -35,12 +35,14 @@ jobs:
           node tests/core-v3-phase2-services.test.js
           node tests/core-v3-phase3-route-geometry.test.js
           node tests/core-v3-phase4-ui-bootstrap.test.js
+          node tests/core-v3-legacy-kernel-cleanup.test.js
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
           domain=Path('rc2-route-geometry-domain-v3.js').read_text(encoding='utf-8')
           ui=Path('rc2-ui-shell-v3.js').read_text(encoding='utf-8')
           boot=Path('rc2-bootstrap-v3.js').read_text(encoding='utf-8')
+          app=Path('app.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
           assert html.index('app.js') < html.index('rc2-route-geometry-domain-v3.js') < html.index('rc2-core.js')
           assert html.index('rc2-unified-driving-ui.js') < html.index('rc2-ui-shell-v3.js') < html.index('rc2-bootstrap-v3.js')
@@ -50,7 +52,10 @@ jobs:
           assert 'localStorage.' not in ui
           assert 'DiDauBootstrap' in boot and "version:'3.3.0-rc2'" in boot
           assert 'R-002' not in boot
-          print('D1 RC2 CORE ENGINE V3.3 PHASE4 UI/BOOTSTRAP GATE: PASS')
+          assert "APP_VERSION='D1-RC2.0.0'" in app
+          assert '<h2>Mạng tuyến PDH Travel</h2>' not in app
+          assert len(app) < 20000
+          print('D1 RC2 CORE V3 LEGACY KERNEL CLEANUP GATE: PASS')
           PY
 
   deploy:

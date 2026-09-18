@@ -37,8 +37,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
-          for f in rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js; do node --check "$f"; done
+          for f in index.html rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
+          for f in rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js; do node --check "$f"; done
           node tests/b12-simulation.test.js
           node tests/b13-gps-faults.test.js
           node tests/b14-gps-hysteresis.test.js
@@ -46,9 +46,12 @@ jobs:
           node tests/core-v3-phase2-services.test.js
           node tests/core-v3-phase3-route-geometry.test.js
           node tests/core-v3-phase4-ui-bootstrap.test.js
+          node tests/core-v3-legacy-kernel-cleanup.test.js
           for f in rc2-app-services-v3.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js; do grep -q "include '$f'" android/app/build.gradle; done
           grep -q "versionCode 200" android/app/build.gradle
           grep -q "versionName '2.0.0'" android/app/build.gradle
+          grep -q "APP_VERSION='D1-RC2.0.0'" app.js
+          ! grep -q '<h2>Mạng tuyến PDH Travel</h2>' app.js
           grep -q "DiDauUiShell" rc2-ui-shell-v3.js
           grep -q "DiDauBootstrap" rc2-bootstrap-v3.js
       - name: Validate signing secrets
