@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
   push:
     branches: ["main"]
-    paths: ["android/**","index.html","app.js","rc2-core.js","rc2-discovery.js","rc2-data.js","rc2-bulk.js","rc2-seed.js","rc2-geocode.js","rc2-driving.js","rc2-alerts.js","rc2-proactive.js","rc2-driver-rest.js","rc2-trip-status.js","styles.css","manifest.webmanifest","data/**","icons/**",".github/workflows/android-apk.yml"]
+    paths: ["android/**","index.html","app.js","rc2-core.js","rc2-discovery.js","rc2-data.js","rc2-bulk.js","rc2-seed.js","rc2-geocode.js","rc2-driving.js","rc2-alerts.js","rc2-proactive.js","rc2-driver-rest.js","rc2-trip-status.js","rc2-driving-mode.js","styles.css","manifest.webmanifest","data/**","icons/**",".github/workflows/android-apk.yml"]
   pull_request:
     branches: ["main"]
-    paths: ["android/**","index.html","app.js","rc2-core.js","rc2-discovery.js","rc2-data.js","rc2-bulk.js","rc2-seed.js","rc2-geocode.js","rc2-driving.js","rc2-alerts.js","rc2-proactive.js","rc2-driver-rest.js","rc2-trip-status.js","styles.css","manifest.webmanifest","data/**","icons/**",".github/workflows/android-apk.yml"]
+    paths: ["android/**","index.html","app.js","rc2-core.js","rc2-discovery.js","rc2-data.js","rc2-bulk.js","rc2-seed.js","rc2-geocode.js","rc2-driving.js","rc2-alerts.js","rc2-proactive.js","rc2-driver-rest.js","rc2-trip-status.js","rc2-driving-mode.js","styles.css","manifest.webmanifest","data/**","icons/**",".github/workflows/android-apk.yml"]
 
 permissions:
   contents: read
@@ -40,13 +40,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js; do node --check "$f"; done
-          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js; do grep -q "include '$f'" android/app/build.gradle; done
-          grep -q "getTripStatus" rc2-trip-status.js
-          grep -q "Trạng thái hành trình" rc2-trip-status.js
-          grep -q "getDrivingRestState" rc2-trip-status.js
-          grep -q "getDrivingRecommendations" rc2-trip-status.js
+          for f in android/settings.gradle android/build.gradle android/app/build.gradle android/app/src/main/AndroidManifest.xml android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java rc2-trip-status.js rc2-driving-mode.js; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js; do node --check "$f"; done
+          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js; do grep -q "include '$f'" android/app/build.gradle; done
+          grep -q "openDrivingMode" rc2-driving-mode.js
+          grep -q "getTripStatus" rc2-driving-mode.js
           grep -q "ACCESS_FINE_LOCATION" android/app/src/main/AndroidManifest.xml
       - name: Build installable debug APK
         run: gradle -p android --no-daemon :app:assembleDebug
@@ -54,7 +52,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Prepare single-file installer
         shell: bash
         run: |
