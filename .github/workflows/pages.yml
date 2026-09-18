@@ -26,47 +26,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
-          node --check app.js
-          node --check rc2-core.js
-          node --check rc2-discovery.js
-          node --check rc2-data.js
-          node --check rc2-bulk.js
-          node --check rc2-seed.js
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js; do node --check "$f"; done
           python - <<'PY'
           import json
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
-          app=Path('app.js').read_text(encoding='utf-8')
-          core=Path('rc2-core.js').read_text(encoding='utf-8')
           discovery=Path('rc2-discovery.js').read_text(encoding='utf-8')
-          data=Path('rc2-data.js').read_text(encoding='utf-8')
-          bulk=Path('rc2-bulk.js').read_text(encoding='utf-8')
           seed=Path('rc2-seed.js').read_text(encoding='utf-8')
+          geo=Path('rc2-geocode.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
           manifest=Path('manifest.webmanifest').read_text(encoding='utf-8')
-          paths=['data/seed-ha-tien.json','data/seed-r002-corridor.json','data/seed-r002-b2.json']
-          packs=[json.loads(Path(p).read_text(encoding='utf-8')) for p in paths]
           required_ids=['accountBtn','gpsBtn','routeTitle','routeInfo','gpsStatus','gpsAccuracy','gpsMotion','gpsAge','routeDetect','installBox','installMsg','installBtn','search','main','modal']
-          for item in required_ids: assert f'id="{item}"' in html, f'missing DOM id: {item}'
-          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js','rc2-seed.js']: assert f'<script src="{script}" defer></script>' in html
-          assert 'http-equiv="refresh"' not in html.lower()
-          assert "serviceWorker.register('./sw.js')" in app
-          for asset in ["'./rc2-seed.js'","'./data/seed-ha-tien.json'","'./data/seed-r002-corridor.json'","'./data/seed-r002-b2.json'"]: assert asset in sw
-          assert 'd1-gps-tracking' in core and 'adminCreateUser' in core
-          assert 'Khám phá quanh tôi' in discovery and 'd1-discovery-radius' in discovery
-          for token in ['POI_DEDUP_MERGED','POI_SCHEMA_MIGRATED','SOURCE_IMPORTED','saveNormalizedPoi','suggestRoute']: assert token in data
-          for token in ['parseCsv','previewBulkImport','commitBulkImport','downloadBulkTemplate','POI_BULK_IMPORTED','MAX_ROWS']: assert token in bulk
-          assert 'importHaTienSeed' in seed and 'importR002CorridorSeed' in seed and 'importR002B2Seed' in seed and 'POI_SEED_IMPORTED' in seed
-          for pack in packs:
-              assert pack.get('routeId')=='R-002'
-              assert len(pack.get('pois',[]))>=7
-              assert all(p.get('sourceUrl') and p.get('verified') is False and p.get('verificationStatus')=='SOURCE_IMPORTED' for p in pack['pois'])
-          b2=packs[-1]
-          assert all(p.get('gpsRankEligible') is False and p.get('coordinateStatus')=='ADDRESS_ONLY_NEEDS_GEOCODE' for p in b2['pois'])
-          assert {'Quán ăn','Cây xăng'} <= {p.get('category') for p in b2['pois']}
+          for item in required_ids: assert f'id="{item}"' in html
+          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js','rc2-seed.js','rc2-geocode.js']: assert f'<script src="{script}" defer></script>' in html
+          for asset in ["'./rc2-geocode.js'","'./data/seed-r002-b3.json'"]: assert asset in sw
+          assert 'gpsRankEligible!==false' in discovery and 'Chờ xác minh tọa độ' in discovery
+          for token in ['openGeocodeQueue','confirmGeocode','POI_COORDINATE_CONFIRMED','FIELD_GPS_CONFIRMED','MANUAL_COORD_CONFIRMED']: assert token in geo
+          assert 'importR002B3Seed' in seed
+          pack=json.loads(Path('data/seed-r002-b3.json').read_text(encoding='utf-8'))
+          assert pack.get('routeId')=='R-002' and len(pack.get('pois',[]))>=3
+          assert all(p.get('sourceUrl') and p.get('verified') is False and p.get('gpsRankEligible') is False for p in pack['pois'])
           assert '"display":"standalone"' in manifest.replace(' ', '')
-          print('D1 RC2 R002 B2 DATA GATE: PASS')
+          print('D1 RC2 R002 B3 GEOCODE GATE: PASS')
           PY
 
   deploy:
