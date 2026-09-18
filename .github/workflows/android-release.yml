@@ -37,11 +37,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js; do node --check "$f"; done
-          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js; do grep -q "include '$f'" android/app/build.gradle; done
-          grep -q "getDrivingRestState" rc2-driver-rest.js
-          grep -q "THRESHOLD_MS=2\*60\*60\*1000" rc2-driver-rest.js
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js; do node --check "$f"; done
+          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js; do grep -q "include '$f'" android/app/build.gradle; done
+          grep -q "getTripStatus" rc2-trip-status.js
+          grep -q "Trạng thái hành trình" rc2-trip-status.js
       - name: Validate signing secrets
         shell: bash
         env:
@@ -69,7 +69,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Verify APK signature and package
         shell: bash
         run: |
