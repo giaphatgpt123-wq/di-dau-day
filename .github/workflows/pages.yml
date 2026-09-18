@@ -26,10 +26,11 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js; do node --check "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js; do node --check "$f"; done
           node tests/b12-simulation.test.js
           node tests/b13-gps-faults.test.js
+          node tests/b14-gps-hysteresis.test.js
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
@@ -39,9 +40,9 @@ jobs:
           assert '<script src="rc2-gps-health.js" defer></script>' in html
           assert html.index('rc2-gps-health.js') < html.index('rc2-driving.js')
           assert "'./rc2-gps-health.js'" in sw
-          for token in ['NO_GPS','STALE','POOR_ACCURACY','HEADING_UNSTABLE','STALE_MS=20000','MAX_DRIVING_ACCURACY=120','getGpsHealth']: assert token in health
+          for token in ['NO_GPS','STALE','POOR_ACCURACY','HEADING_UNSTABLE','RECOVERING','DIRECTION_RECOVERING','RECOVERY_GOOD_SAMPLES=3','DIRECTION_GOOD_SAMPLES=3','getGpsHealth']: assert token in health
           for token in ['paused','gpsHealth','speedKnown','Dừng ngắn không cộng vào thời gian lái']: assert token in rest
-          print('D1 RC2 R002 B13 GPS FAULT GATE: PASS')
+          print('D1 RC2 R002 B14 GPS HYSTERESIS GATE: PASS')
           PY
 
   deploy:
