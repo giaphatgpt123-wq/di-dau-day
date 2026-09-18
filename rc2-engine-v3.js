@@ -56,6 +56,40 @@
     }
   };
 
-  const EngineV3={version:'3.0.0-rc2',RouteContext,GpsService,PoiRepository,DrivingAdvisor,geo:{distanceKm,bearing,angleDiff},poi:{classify,priority}};
+  const AlertEngine={
+    key:'d1-proactive-alert-state',
+    serviceGroups:['Cây xăng','Trạm dừng'],
+    read(){try{return JSON.parse(localStorage.getItem(this.key)||'{}')}catch{return{}}},
+    write(v){localStorage.setItem(this.key,JSON.stringify(v))},
+    reset(){localStorage.removeItem(this.key)},
+    bucket(d){return d<=10?10:d<=20?20:d<=30?30:null},
+    evaluate(){
+      const rec=DrivingAdvisor.recommendations(),state=this.read(),next={...state},events=[];
+      for(const item of rec.items||[]){const level=this.bucket(Number(item.driveDistance));if(!level)continue;const id=String(item.id||item.name||'poi'),prev=Number(state[id]||0);if(prev===level)continue;if(prev&&level>prev)continue;next[id]=level;events.push({type:'PROXIMITY',level,group:item.driveGroup,name:item.name,distanceKm:item.driveDistance,corridorStage:item.corridorStage||null,lat:item.lat,lng:item.lng,routeId:rec.routeContext?.routeId||null})}
+      const services=(rec.items||[]).filter(x=>this.serviceGroups.includes(x.driveGroup));
+      const serviceGap=rec.mode==='MOVING_FORWARD'&&services.length===0,gapKey=`__service_gap__:${rec.routeContext?.routeId||'none'}`;
+      if(serviceGap&&!state[gapKey]){next[gapKey]=Date.now();events.push({type:'SERVICE_GAP',level:null,group:'Dịch vụ',name:'Phía trước chưa có cây xăng/trạm dừng đủ điều kiện trong phạm vi hiện tại',distanceKm:null,routeId:rec.routeContext?.routeId||null})}
+      if(!serviceGap&&state[gapKey])delete next[gapKey];
+      this.write(next);return{mode:rec.mode,events,serviceGap,routeContext:rec.routeContext};
+    }
+  };
+
+  const DrivingSession={
+    key:'d1-driving-rest-state',thresholdMs:2*60*60*1000,resetStopMs:15*60*1000,movingSpeed:1.5,
+    read(){try{return JSON.parse(localStorage.getItem(this.key)||'{}')}catch{return{}}},write(v){localStorage.setItem(this.key,JSON.stringify(v))},reset(){localStorage.removeItem(this.key)},
+    migrate(s){const next={...s};if(next.startedAt&&!finite(next.accumulatedMs)){const end=Number(next.lastMovingAt||next.startedAt);next.accumulatedMs=Math.max(0,end-Number(next.startedAt))}return next},
+    update(){
+      const now=Date.now(),health=GpsService.health(),gps=health?health.fix:GpsService.fix(),state=this.migrate(this.read());
+      const speedKnown=health?Boolean(health.speedKnown):finite(gps?.speed),speed=speedKnown?Number(gps.speed):null,paused=health?(!health.usable||!speedKnown):!speedKnown,moving=!paused&&speed>=this.movingSpeed;let next={...state};
+      if(paused){if(next.startedAt)next.lastSampleAt=now}
+      else if(moving){if(!next.startedAt)next={startedAt:now,accumulatedMs:0,lastSampleAt:now,lastMovingAt:now};else if(next.stoppedAt){if(now-next.stoppedAt>=this.resetStopMs)next={startedAt:now,accumulatedMs:0,lastSampleAt:now,lastMovingAt:now};else{delete next.stoppedAt;next.lastSampleAt=now;next.lastMovingAt=now}}else{const sample=Number(next.lastSampleAt||next.lastMovingAt||now);next.accumulatedMs=Math.max(0,Number(next.accumulatedMs)||0)+Math.max(0,now-sample);next.lastSampleAt=now;next.lastMovingAt=now}}
+      else if(next.startedAt){if(!next.stoppedAt){const sample=Number(next.lastSampleAt||next.lastMovingAt||now);next.accumulatedMs=Math.max(0,Number(next.accumulatedMs)||0)+Math.max(0,now-sample);next.stoppedAt=now}if(now-next.stoppedAt>=this.resetStopMs)next={}}
+      this.write(next);return{state:next,elapsed:Math.max(0,Number(next.accumulatedMs)||0),moving,paused,speed,gps,gpsHealth:health};
+    },
+    nearestRest(){return (DrivingAdvisor.recommendations().items||[]).filter(x=>x.driveGroup==='Trạm dừng').sort((a,b)=>a.driveDistance-b.driveDistance)[0]||null},
+    evaluate(){const session=this.update(),state=session.state,due=session.elapsed>=this.thresholdMs,already=Boolean(state.restReminderIssued);let issued=false;if(due&&!already){state.restReminderIssued=Date.now();this.write(state);issued=true}return{...session,due,issued,nearestRest:this.nearestRest(),thresholdMs:this.thresholdMs}}
+  };
+
+  const EngineV3={version:'3.0.0-rc2',RouteContext,GpsService,PoiRepository,DrivingAdvisor,AlertEngine,DrivingSession,geo:{distanceKm,bearing,angleDiff},poi:{classify,priority}};
   window.DiDauEngine=EngineV3;
 })();
