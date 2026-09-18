@@ -1,0 +1,21 @@
+name: A1-TIC CI
+on:
+  pull_request:
+    paths:
+      - "collector/**"
+      - ".github/workflows/a1-tic-ci.yml"
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Unit tests
+        run: python -m unittest discover -s collector/tests -v
+      - name: Sample export
+        run: python collector/run.py --input collector/examples/osm_sample.json --output /tmp/a1-tic-poi.json
+      - name: Verify export
+        run: python -c "import json; d=json.load(open('/tmp/a1-tic-poi.json')); assert len(d)==1 and d[0]['poi_id'].startswith('A1-')"
