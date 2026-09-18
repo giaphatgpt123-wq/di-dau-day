@@ -14,7 +14,7 @@
 <body>
   <div class="app">
     <header class="top">
-      <div class="brand">Đi Đâu Đây<small>D1 · RC2 Discovery</small></div>
+      <div class="brand">Đi Đâu Đây<small>D1 · RC2 Data</small></div>
       <button id="accountBtn" class="pill" type="button">Tài khoản</button>
     </header>
 
@@ -23,13 +23,11 @@
       <small>TUYẾN ĐANG CHỌN</small>
       <h1 id="routeTitle">Đang nạp tuyến…</h1>
       <p id="routeInfo">Đang nạp dữ liệu tuyến.</p>
-
       <div class="gpsbox" aria-live="polite">
         <div class="gpsline"><span id="gpsStatus">GPS: chưa bật</span><span id="gpsAccuracy">Sai số: —</span></div>
         <div class="gpsline"><span id="gpsMotion">Tốc độ: — · Hướng: —</span><span id="gpsAge">Tuổi mẫu: —</span></div>
         <div id="routeDetect" class="detect">Map matching: chờ GPS và dữ liệu geometry/trace được duyệt.</div>
       </div>
-
       <div id="installBox" class="install">
         <b>Cài ứng dụng</b>
         <p id="installMsg" class="meta">Đang kiểm tra khả năng cài PWA.</p>
@@ -61,5 +59,6 @@
   <script src="app.js" defer></script>
   <script src="rc2-core.js" defer></script>
   <script src="rc2-discovery.js" defer></script>
+  <script src="rc2-data.js" defer></script>
 </body>
 </html>
