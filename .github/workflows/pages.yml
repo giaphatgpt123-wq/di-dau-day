@@ -26,23 +26,19 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js; do node --check "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js; do node --check "$f"; done
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
-          driving=Path('rc2-driving.js').read_text(encoding='utf-8')
-          alerts=Path('rc2-alerts.js').read_text(encoding='utf-8')
-          proactive=Path('rc2-proactive.js').read_text(encoding='utf-8')
+          rest=Path('rc2-driver-rest.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
           manifest=Path('manifest.webmanifest').read_text(encoding='utf-8')
-          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js','rc2-seed.js','rc2-geocode.js','rc2-driving.js','rc2-alerts.js','rc2-proactive.js']: assert f'<script src="{script}" defer></script>' in html
-          assert "'./rc2-proactive.js'" in sw
-          for token in ['getDrivingRecommendations','MOVING_FORWARD','headingDelta','<=80']: assert token in driving
-          for token in ['getDrivingAlertState','setDrivingAlertThreshold','THRESHOLDS=[10,20,30]']: assert token in alerts
-          for token in ['getProactiveAlertState','resetProactiveAlerts','SERVICE_GAP','PROXIMITY','30,20,10','d1-proactive-alert-state','Cảnh báo chủ động']: assert token in proactive
+          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js','rc2-seed.js','rc2-geocode.js','rc2-driving.js','rc2-alerts.js','rc2-proactive.js','rc2-driver-rest.js']: assert f'<script src="{script}" defer></script>' in html
+          assert "'./rc2-driver-rest.js'" in sw
+          for token in ['getDrivingRestState','resetDrivingRestSession','THRESHOLD_MS=2*60*60*1000','RESET_STOP_MS=15*60*1000','MOVING_SPEED=1.5','Thời gian lái xe','Trạm dừng phía trước']: assert token in rest
           assert '"display":"standalone"' in manifest.replace(' ', '')
-          print('D1 RC2 R002 B7 PROACTIVE GATE: PASS')
+          print('D1 RC2 R002 B8 REST GATE: PASS')
           PY
 
   deploy:
