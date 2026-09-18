@@ -7,7 +7,7 @@
   const HEADING_JUMP_WINDOW_MS=4000;
   let lastStableHeading=null;
   let lastStableHeadingAt=0;
-  const finite=v=>Number.isFinite(Number(v));
+  const finite=v=>v!==null&&v!==undefined&&v!==''&&Number.isFinite(Number(v));
   const norm=x=>((Number(x)%360)+360)%360;
   const angleDiff=(a,b)=>Math.abs(((norm(a)-norm(b)+540)%360)-180);
   const rawFix=()=>lastFix||(()=>{try{return JSON.parse(localStorage.getItem('d1-last-gps')||'null')}catch{return null}})();
