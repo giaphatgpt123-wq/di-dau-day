@@ -37,14 +37,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js; do node --check "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js; do node --check "$f"; done
           node tests/b12-simulation.test.js
           node tests/b13-gps-faults.test.js
           node tests/b14-gps-hysteresis.test.js
-          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js; do grep -q "include '$f'" android/app/build.gradle; done
-          grep -q "RECOVERY_GOOD_SAMPLES=3" rc2-gps-health.js
-          grep -q "DIRECTION_GOOD_SAMPLES=3" rc2-gps-health.js
+          node tests/core-engine-v3.test.js
+          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js; do grep -q "include '$f'" android/app/build.gradle; done
+          grep -q "versionCode 200" android/app/build.gradle
+          grep -q "versionName '2.0.0'" android/app/build.gradle
+          grep -q "RouteContext" rc2-engine-v3.js
+          grep -q "DrivingAdvisor" rc2-engine-v3.js
+          ! grep -q "p.routeId==='R-002'" rc2-driving.js
       - name: Validate signing secrets
         shell: bash
         env:
@@ -72,7 +76,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js data/routes-pdh.json data/geometry-pdh.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Verify APK signature and package
         shell: bash
         run: |
@@ -81,7 +85,7 @@ jobs:
           test -s "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/apksigner" verify --verbose --print-certs "$APK"
           "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging "$APK" | tee apk-badging.txt
-          grep -q "package: name='com.pdhtravel.didauday' versionCode='151' versionName='1.5.1'" apk-badging.txt
+          grep -q "package: name='com.pdhtravel.didauday' versionCode='200' versionName='2.0.0'" apk-badging.txt
       - name: Prepare signed installer
         shell: bash
         run: |

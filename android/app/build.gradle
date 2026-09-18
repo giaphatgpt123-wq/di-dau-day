@@ -16,8 +16,8 @@ android {
         applicationId 'com.pdhtravel.didauday'
         minSdk 26
         targetSdk 35
-        versionCode 151
-        versionName '1.5.1'
+        versionCode 200
+        versionName '2.0.0'
     }
     signingConfigs {
         release {
@@ -68,6 +68,7 @@ tasks.register('syncWebAssets', Copy) {
         include 'rc2-seed.js'
         include 'rc2-geocode.js'
         include 'rc2-gps-health.js'
+        include 'rc2-engine-v3.js'
         include 'rc2-driving.js'
         include 'rc2-alerts.js'
         include 'rc2-proactive.js'

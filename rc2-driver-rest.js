@@ -1,43 +1,22 @@
 (()=>{
   'use strict';
-  const KEY='d1-driving-rest-state';
-  const THRESHOLD_MS=2*60*60*1000;
-  const RESET_STOP_MS=15*60*1000;
-  const MOVING_SPEED=1.5;
   const esc=v=>String(v??'').replace(/[&<>'\"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','\"':'&quot;'}[ch]));
-  const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return{}}};
-  const write=s=>localStorage.setItem(KEY,JSON.stringify(s));
-  const migrate=s=>{const next={...s};if(next.startedAt&&!Number.isFinite(Number(next.accumulatedMs))){const end=Number(next.lastMovingAt||next.startedAt);next.accumulatedMs=Math.max(0,end-Number(next.startedAt));}return next};
-  function updateSession(){
-    const now=Date.now(),health=typeof window.getGpsHealth==='function'?window.getGpsHealth():null,gps=health?health.fix:(lastFix||JSON.parse(localStorage.getItem('d1-last-gps')||'null')),state=migrate(read());
-    const speedKnown=health?Boolean(health.speedKnown):Number.isFinite(Number(gps?.speed));
-    const speed=speedKnown?Number(gps.speed):null;
-    const paused=health?(!health.usable||!speedKnown):!speedKnown;
-    const moving=!paused&&speed>=MOVING_SPEED;
-    let next={...state};
-    if(paused){
-      if(next.startedAt)next.lastSampleAt=now;
-    }else if(moving){
-      if(!next.startedAt){next={startedAt:now,accumulatedMs:0,lastSampleAt:now,lastMovingAt:now};}
-      else if(next.stoppedAt){
-        if(now-next.stoppedAt>=RESET_STOP_MS)next={startedAt:now,accumulatedMs:0,lastSampleAt:now,lastMovingAt:now};
-        else{delete next.stoppedAt;next.lastSampleAt=now;next.lastMovingAt=now;}
-      }else{
-        const sample=Number(next.lastSampleAt||next.lastMovingAt||now);
-        next.accumulatedMs=Math.max(0,Number(next.accumulatedMs)||0)+Math.max(0,now-sample);
-        next.lastSampleAt=now;next.lastMovingAt=now;
-      }
-    }else if(next.startedAt){
-      if(!next.stoppedAt){const sample=Number(next.lastSampleAt||next.lastMovingAt||now);next.accumulatedMs=Math.max(0,Number(next.accumulatedMs)||0)+Math.max(0,now-sample);next.stoppedAt=now;}
-      if(now-next.stoppedAt>=RESET_STOP_MS)next={};
-    }
-    write(next);
-    const elapsed=Math.max(0,Number(next.accumulatedMs)||0);
-    return{state:next,elapsed,moving,paused,speed,gps,gpsHealth:health};
-  }
-  function nearestRest(){if(typeof window.getDrivingRecommendations!=='function')return null;const rec=window.getDrivingRecommendations();return (rec.items||[]).filter(x=>x.driveGroup==='Trạm dừng').sort((a,b)=>a.driveDistance-b.driveDistance)[0]||null;}
-  function evaluateRestReminder(){const session=updateSession(),state=session.state,due=session.elapsed>=THRESHOLD_MS,already=Boolean(state.restReminderIssued);let issued=false;if(due&&!already){state.restReminderIssued=Date.now();write(state);issued=true;}return{...session,due,issued,nearestRest:nearestRest(),thresholdMs:THRESHOLD_MS};}
+  const evaluate=()=>window.DiDauEngine?.DrivingSession?.evaluate?.()||{state:{},elapsed:0,moving:false,paused:true,speed:null,gps:null,gpsHealth:null,due:false,issued:false,nearestRest:null,thresholdMs:2*60*60*1000};
   const dir=p=>p?`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(`${Number(p.lat)},${Number(p.lng)}`)}`:null;
-  function renderRestReminder(){if(view!=='discovery')return;const main=document.getElementById('main');if(!main)return;main.querySelector('[data-driver-rest]')?.remove();const r=evaluateRestReminder(),panel=document.createElement('section');panel.className='panel';panel.dataset.driverRest='1';const mins=Math.floor(r.elapsed/60000),hh=Math.floor(mins/60),mm=mins%60;let body=`<p class="meta">Thời gian lái thực tế ghi nhận: ${hh} giờ ${mm} phút. Dừng ngắn không cộng vào thời gian lái; dừng liên tục 15 phút sẽ bắt đầu phiên mới.</p>`;if(r.paused)body+=`<div class="notice"><b>Tạm dừng bộ đếm do GPS chưa đủ tin cậy${r.gpsHealth?.reason?`: ${esc(r.gpsHealth.reason)}`:''}.</b></div>`;if(r.due){body+=`<div class="notice"><b>Đã đến ngưỡng nghỉ sau 2 giờ lái thực tế.</b></div>`;if(r.nearestRest)body+=`<div style="padding:8px 0"><b>Trạm dừng phía trước: ${esc(r.nearestRest.name)}</b><div class="meta">${r.nearestRest.driveDistance.toFixed(1)} km${r.nearestRest.corridorStage?` · ${esc(r.nearestRest.corridorStage)}`:''}</div><a class="pill primary" href="${dir(r.nearestRest)}" target="_blank" rel="noopener">Dẫn đường đến điểm nghỉ</a></div>`;else body+='<p class="meta">Chưa có trạm dừng đủ điều kiện GPS trong danh sách phía trước. Hãy chủ động chọn điểm dừng an toàn phù hợp.</p>';}else body+='<p class="meta">Chưa đến ngưỡng nhắc nghỉ 2 giờ lái thực tế.</p>';panel.innerHTML=`<h3>Thời gian lái xe</h3>${body}`;const anchor=main.querySelector('[data-proactive-alerts]')||main.querySelector('[data-driving-alerts]')||main.querySelector('[data-driving-recommendations]');if(anchor)anchor.insertAdjacentElement('afterend',panel);else main.prepend(panel);}
-  window.getDrivingRestState=evaluateRestReminder;window.resetDrivingRestSession=()=>localStorage.removeItem(KEY);window.renderDrivingRestReminder=renderRestReminder;const prior=window.renderDiscovery;if(typeof prior==='function')window.renderDiscovery=function renderDiscoveryWithRest(q=''){prior(q);renderRestReminder()};
+  function renderRestReminder(){
+    if(view!=='discovery')return;
+    const main=document.getElementById('main');if(!main)return;
+    main.querySelector('[data-driver-rest]')?.remove();
+    const r=evaluate(),panel=document.createElement('section');panel.className='panel';panel.dataset.driverRest='1';
+    const mins=Math.floor(r.elapsed/60000),hh=Math.floor(mins/60),mm=mins%60;
+    let body=`<p class="meta">Thời gian lái thực tế ghi nhận: ${hh} giờ ${mm} phút. Dừng ngắn không cộng vào thời gian lái; dừng liên tục 15 phút sẽ bắt đầu phiên mới.</p>`;
+    if(r.paused)body+=`<div class="notice"><b>Tạm dừng bộ đếm do GPS chưa đủ tin cậy${r.gpsHealth?.reason?`: ${esc(r.gpsHealth.reason)}`:''}.</b></div>`;
+    if(r.due){body+=`<div class="notice"><b>Đã đến ngưỡng nghỉ sau 2 giờ lái thực tế.</b></div>`;if(r.nearestRest)body+=`<div style="padding:8px 0"><b>Trạm dừng phía trước: ${esc(r.nearestRest.name)}</b><div class="meta">${r.nearestRest.driveDistance.toFixed(1)} km${r.nearestRest.corridorStage?` · ${esc(r.nearestRest.corridorStage)}`:''}</div><a class="pill primary" href="${dir(r.nearestRest)}" target="_blank" rel="noopener">Dẫn đường đến điểm nghỉ</a></div>`;else body+='<p class="meta">Chưa có trạm dừng đủ điều kiện GPS trong danh sách phía trước. Hãy chủ động chọn điểm dừng an toàn phù hợp.</p>'}else body+='<p class="meta">Chưa đến ngưỡng nhắc nghỉ 2 giờ lái thực tế.</p>';
+    panel.innerHTML=`<h3>Thời gian lái xe</h3>${body}`;
+    const anchor=main.querySelector('[data-proactive-alerts]')||main.querySelector('[data-driving-alerts]')||main.querySelector('[data-driving-recommendations]');if(anchor)anchor.insertAdjacentElement('afterend',panel);else main.prepend(panel);
+  }
+  window.getDrivingRestState=evaluate;
+  window.resetDrivingRestSession=()=>window.DiDauEngine?.DrivingSession?.reset?.();
+  window.renderDrivingRestReminder=renderRestReminder;
+  const prior=window.renderDiscovery;if(typeof prior==='function')window.renderDiscovery=function renderDiscoveryWithRest(q=''){prior(q);renderRestReminder()};
 })();
