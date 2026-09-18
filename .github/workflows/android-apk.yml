@@ -1,4 +1,4 @@
-name: Build Android APK D1 RC1.5
+name: Build Android APK D1 RC2
 
 on:
   workflow_dispatch:
@@ -8,6 +8,21 @@ on:
       - "android/**"
       - "index.html"
       - "app.js"
+      - "rc2-core.js"
+      - "rc2-discovery.js"
+      - "styles.css"
+      - "manifest.webmanifest"
+      - "data/**"
+      - "icons/**"
+      - ".github/workflows/android-apk.yml"
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "android/**"
+      - "index.html"
+      - "app.js"
+      - "rc2-core.js"
+      - "rc2-discovery.js"
       - "styles.css"
       - "manifest.webmanifest"
       - "data/**"
@@ -50,7 +65,14 @@ jobs:
           test -s android/app/build.gradle
           test -s android/app/src/main/AndroidManifest.xml
           test -s android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java
+          test -s rc2-core.js
+          test -s rc2-discovery.js
+          node --check app.js
+          node --check rc2-core.js
+          node --check rc2-discovery.js
           grep -q "com.pdhtravel.didauday" android/app/build.gradle
+          grep -q "include 'rc2-core.js'" android/app/build.gradle
+          grep -q "include 'rc2-discovery.js'" android/app/build.gradle
           grep -q "ACCESS_FINE_LOCATION" android/app/src/main/AndroidManifest.xml
           grep -q "onGeolocationPermissionsShowPrompt" android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java
           grep -q "onShowFileChooser" android/app/src/main/java/com/pdhtravel/didauday/MainActivity.java
@@ -59,19 +81,32 @@ jobs:
       - name: Build installable debug APK
         run: gradle -p android --no-daemon :app:assembleDebug
 
+      - name: Verify bundled offline web assets
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s android/app/src/main/assets/www/index.html
+          test -s android/app/src/main/assets/www/app.js
+          test -s android/app/src/main/assets/www/rc2-core.js
+          test -s android/app/src/main/assets/www/rc2-discovery.js
+          test -s android/app/src/main/assets/www/data/routes-pdh.json
+          test -s android/app/src/main/assets/www/data/geometry-pdh.json
+
       - name: Prepare single-file installer
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p dist
-          cp android/app/build/outputs/apk/debug/app-debug.apk dist/Di-Dau-Day-D1-RC1.5.apk
-          test -s dist/Di-Dau-Day-D1-RC1.5.apk
-          sha256sum dist/Di-Dau-Day-D1-RC1.5.apk | tee dist/Di-Dau-Day-D1-RC1.5.apk.sha256
+          cp android/app/build/outputs/apk/debug/app-debug.apk dist/Di-Dau-Day-D1-RC2.apk
+          test -s dist/Di-Dau-Day-D1-RC2.apk
+          sha256sum dist/Di-Dau-Day-D1-RC2.apk | tee dist/Di-Dau-Day-D1-RC2.apk.sha256
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Di-Dau-Day-D1-RC1.5-APK
-          path: dist/Di-Dau-Day-D1-RC1.5.apk
+          name: Di-Dau-Day-D1-RC2-APK
+          path: |
+            dist/Di-Dau-Day-D1-RC2.apk
+            dist/Di-Dau-Day-D1-RC2.apk.sha256
           if-no-files-found: error
           retention-days: 30
