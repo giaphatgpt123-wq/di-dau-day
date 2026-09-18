@@ -37,13 +37,14 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js data/routes-pdh.json data/geometry-pdh.json; do test -s "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json; do test -s "$f"; done
           node --check app.js
           node --check rc2-core.js
           node --check rc2-discovery.js
           node --check rc2-data.js
           node --check rc2-bulk.js
-          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js; do grep -q "include '$f'" android/app/build.gradle; done
+          node --check rc2-seed.js
+          for f in rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js; do grep -q "include '$f'" android/app/build.gradle; done
       - name: Validate signing secrets
         shell: bash
         env:
@@ -71,7 +72,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js; do test -s "android/app/src/main/assets/www/$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js data/seed-ha-tien.json; do test -s "android/app/src/main/assets/www/$f"; done
       - name: Verify APK signature and package
         shell: bash
         run: |
