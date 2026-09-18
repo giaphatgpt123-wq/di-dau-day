@@ -1,0 +1,2 @@
+# Batch Collection V1
+The first route batch is HCMC -> Hà Tiên. Jobs are generated as region x category and processed incrementally. Failed jobs are retried up to policy limits. Release metrics prevent a low-quality batch from entering the A1 export stream. Initial gate: >=70% verified and >=95% geocoded among collected records; thresholds are configurable and should be tightened after pilot calibration.
