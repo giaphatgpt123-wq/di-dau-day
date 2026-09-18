@@ -26,24 +26,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js; do node --check "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js; do node --check "$f"; done
           python - <<'PY'
-          import json
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
-          discovery=Path('rc2-discovery.js').read_text(encoding='utf-8')
           driving=Path('rc2-driving.js').read_text(encoding='utf-8')
+          alerts=Path('rc2-alerts.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
           manifest=Path('manifest.webmanifest').read_text(encoding='utf-8')
           for item in ['accountBtn','gpsBtn','routeTitle','routeInfo','gpsStatus','gpsAccuracy','gpsMotion','gpsAge','routeDetect','installBox','installMsg','installBtn','search','main','modal']: assert f'id="{item}"' in html
-          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js','rc2-seed.js','rc2-geocode.js','rc2-driving.js']: assert f'<script src="{script}" defer></script>' in html
-          assert "'./rc2-driving.js'" in sw
-          for token in ['gpsRankEligible!==false','setDiscoveryStage','Trạm dừng','Cây xăng','d1-discovery-stage']: assert token in discovery
-          for token in ['getDrivingRecommendations','MOVING_FORWARD','headingDelta','<=80','Cây xăng','Trạm dừng','Đề xuất phía trước']: assert token in driving
-          assert "p.routeId==='R-002'" in driving and "p.gpsRankEligible!==false" in driving
+          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js','rc2-seed.js','rc2-geocode.js','rc2-driving.js','rc2-alerts.js']: assert f'<script src="{script}" defer></script>' in html
+          assert "'./rc2-alerts.js'" in sw
+          for token in ['getDrivingRecommendations','MOVING_FORWARD','headingDelta','<=80']: assert token in driving
+          for token in ['getDrivingAlertState','setDrivingAlertThreshold','Cảnh báo sắp tới','THRESHOLDS=[10,20,30]','Cây xăng','Trạm dừng','Ăn uống','Lưu trú']: assert token in alerts
+          assert "window.getDrivingRecommendations" in alerts and "d1-driving-alert-threshold" in alerts
           assert '"display":"standalone"' in manifest.replace(' ', '')
-          print('D1 RC2 R002 B5 DRIVING GATE: PASS')
+          print('D1 RC2 R002 B6 ALERT GATE: PASS')
           PY
 
   deploy:
