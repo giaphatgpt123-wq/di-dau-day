@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "sources": [
+    {
+      "id": "osm_overpass",
+      "type": "OPEN_DATA",
+      "adapter": "osm",
+      "enabled": true,
+      "priority": 100,
+      "trust_weight": 0.75,
+      "rate_limit": "provider-policy",
+      "mode": "authorized_public"
+    },
+    {
+      "id": "official_web",
+      "type": "OFFICIAL_WEB",
+      "adapter": "official_web",
+      "enabled": false,
+      "priority": 90,
+      "trust_weight": 0.9,
+      "mode": "allowlist_only"
+    },
+    {
+      "id": "social_public",
+      "type": "SOCIAL",
+      "adapter": "social",
+      "enabled": false,
+      "priority": 60,
+      "trust_weight": 0.45,
+      "mode": "api_feed_or_permitted_public_only"
+    }
+  ]
+}
