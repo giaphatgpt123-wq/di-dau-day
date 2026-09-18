@@ -66,6 +66,8 @@ tasks.register('syncWebAssets', Copy) {
     from(rootProject.projectDir.parentFile) {
         include 'index.html'
         include 'app.js'
+        include 'rc2-core.js'
+        include 'rc2-discovery.js'
         include 'styles.css'
         include 'manifest.webmanifest'
         include 'data/**'
