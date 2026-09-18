@@ -1,0 +1,16 @@
+{
+  "elements": [
+    {
+      "type": "node",
+      "id": 1,
+      "lat": 10.383,
+      "lng": 104.487,
+      "lon": 104.487,
+      "tags": {
+        "name": "POI mẫu Hà Tiên",
+        "amenity": "restaurant",
+        "addr:city": "Hà Tiên"
+      }
+    }
+  ]
+}
