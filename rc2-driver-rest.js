@@ -8,21 +8,46 @@
   const read=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return{}}};
   const write=s=>localStorage.setItem(KEY,JSON.stringify(s));
   const origin=()=>lastFix||JSON.parse(localStorage.getItem('d1-last-gps')||'null');
+  const migrate=s=>{
+    const next={...s};
+    if(next.startedAt&&!Number.isFinite(Number(next.accumulatedMs))){
+      const end=Number(next.lastMovingAt||next.startedAt);
+      next.accumulatedMs=Math.max(0,end-Number(next.startedAt));
+    }
+    return next;
+  };
   function updateSession(){
-    const now=Date.now(),gps=origin(),state=read();
+    const now=Date.now(),gps=origin(),state=migrate(read());
     const speed=Number.isFinite(Number(gps?.speed))?Number(gps.speed):0;
     const moving=speed>=MOVING_SPEED;
     let next={...state};
     if(moving){
-      if(!next.startedAt)next.startedAt=now;
-      next.lastMovingAt=now;
-      delete next.stoppedAt;
+      if(!next.startedAt){
+        next={startedAt:now,accumulatedMs:0,lastSampleAt:now,lastMovingAt:now};
+      }else if(next.stoppedAt){
+        if(now-next.stoppedAt>=RESET_STOP_MS){
+          next={startedAt:now,accumulatedMs:0,lastSampleAt:now,lastMovingAt:now};
+        }else{
+          delete next.stoppedAt;
+          next.lastSampleAt=now;
+          next.lastMovingAt=now;
+        }
+      }else{
+        const sample=Number(next.lastSampleAt||next.lastMovingAt||now);
+        next.accumulatedMs=Math.max(0,Number(next.accumulatedMs)||0)+Math.max(0,now-sample);
+        next.lastSampleAt=now;
+        next.lastMovingAt=now;
+      }
     }else if(next.startedAt){
-      if(!next.stoppedAt)next.stoppedAt=now;
+      if(!next.stoppedAt){
+        const sample=Number(next.lastSampleAt||next.lastMovingAt||now);
+        next.accumulatedMs=Math.max(0,Number(next.accumulatedMs)||0)+Math.max(0,now-sample);
+        next.stoppedAt=now;
+      }
       if(now-next.stoppedAt>=RESET_STOP_MS)next={};
     }
     write(next);
-    const elapsed=next.startedAt?Math.max(0,(next.lastMovingAt||now)-next.startedAt):0;
+    const elapsed=Math.max(0,Number(next.accumulatedMs)||0);
     return{state:next,elapsed,moving,speed,gps};
   }
   function nearestRest(){
@@ -48,12 +73,12 @@
     const r=evaluateRestReminder();
     const panel=document.createElement('section');panel.className='panel';panel.dataset.driverRest='1';
     const mins=Math.floor(r.elapsed/60000),hh=Math.floor(mins/60),mm=mins%60;
-    let body=`<p class="meta">Thời gian lái liên tục ghi nhận: ${hh} giờ ${mm} phút. Dừng liên tục 15 phút sẽ bắt đầu phiên mới.</p>`;
+    let body=`<p class="meta">Thời gian lái thực tế ghi nhận: ${hh} giờ ${mm} phút. Dừng ngắn không cộng vào thời gian lái; dừng liên tục 15 phút sẽ bắt đầu phiên mới.</p>`;
     if(r.due){
-      body+=`<div class="notice"><b>Đã đến ngưỡng nghỉ sau 2 giờ lái liên tục.</b></div>`;
+      body+=`<div class="notice"><b>Đã đến ngưỡng nghỉ sau 2 giờ lái thực tế.</b></div>`;
       if(r.nearestRest){body+=`<div style="padding:8px 0"><b>Trạm dừng phía trước: ${esc(r.nearestRest.name)}</b><div class="meta">${r.nearestRest.driveDistance.toFixed(1)} km${r.nearestRest.corridorStage?` · ${esc(r.nearestRest.corridorStage)}`:''}</div><a class="pill primary" href="${dir(r.nearestRest)}" target="_blank" rel="noopener">Dẫn đường đến điểm nghỉ</a></div>`}
       else body+='<p class="meta">Chưa có trạm dừng đủ điều kiện GPS trong danh sách phía trước. Hãy chủ động chọn điểm dừng an toàn phù hợp.</p>';
-    }else body+='<p class="meta">Chưa đến ngưỡng nhắc nghỉ 2 giờ.</p>';
+    }else body+='<p class="meta">Chưa đến ngưỡng nhắc nghỉ 2 giờ lái thực tế.</p>';
     panel.innerHTML=`<h3>Thời gian lái xe</h3>${body}`;
     const anchor=main.querySelector('[data-proactive-alerts]')||main.querySelector('[data-driving-alerts]')||main.querySelector('[data-driving-recommendations]');if(anchor)anchor.insertAdjacentElement('afterend',panel);else main.prepend(panel);
   }
