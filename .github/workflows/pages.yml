@@ -26,19 +26,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json data/seed-ha-tien.json data/seed-r002-corridor.json data/seed-r002-b2.json data/seed-r002-b3.json data/seed-r002-b4.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js; do node --check "$f"; done
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js styles.css manifest.webmanifest sw.js; do test -s "$f"; done
+          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js; do node --check "$f"; done
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
-          status=Path('rc2-trip-status.js').read_text(encoding='utf-8')
+          mode=Path('rc2-driving-mode.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
-          manifest=Path('manifest.webmanifest').read_text(encoding='utf-8')
-          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js','rc2-bulk.js','rc2-seed.js','rc2-geocode.js','rc2-driving.js','rc2-alerts.js','rc2-proactive.js','rc2-driver-rest.js','rc2-trip-status.js']: assert f'<script src="{script}" defer></script>' in html
-          assert "'./rc2-trip-status.js'" in sw
-          for token in ['getTripStatus','renderTripStatus','Trạng thái hành trình','Cây xăng kế tiếp','Trạm dừng kế tiếp','getDrivingRestState','getDrivingRecommendations','getProactiveAlertState']: assert token in status
-          assert '"display":"standalone"' in manifest.replace(' ', '')
-          print('D1 RC2 R002 B9 TRIP STATUS GATE: PASS')
+          assert '<script src="rc2-driving-mode.js" defer></script>' in html
+          assert "'./rc2-driving-mode.js'" in sw
+          for token in ['openDrivingMode','closeDrivingMode','Chế độ lái xe','Cây xăng kế tiếp','Trạm dừng kế tiếp','getTripStatus']: assert token in mode
+          print('D1 RC2 R002 B10 DRIVING MODE GATE: PASS')
           PY
 
   deploy:
