@@ -26,25 +26,28 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js; do test -s "$f"; done
-          for f in app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js; do node --check "$f"; done
+          for f in index.html rc2-app-services-v3.js app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js; do test -s "$f"; done
+          for f in rc2-app-services-v3.js app.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js; do node --check "$f"; done
           node tests/b12-simulation.test.js
           node tests/b13-gps-faults.test.js
           node tests/b14-gps-hysteresis.test.js
           node tests/core-engine-v3.test.js
+          node tests/core-v3-phase2-services.test.js
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
+          services=Path('rc2-app-services-v3.js').read_text(encoding='utf-8')
           engine=Path('rc2-engine-v3.js').read_text(encoding='utf-8')
           driving=Path('rc2-driving.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
-          assert '<script src="rc2-engine-v3.js" defer></script>' in html
-          assert html.index('rc2-gps-health.js') < html.index('rc2-engine-v3.js') < html.index('rc2-driving.js')
-          assert "'./rc2-engine-v3.js'" in sw
-          for token in ['RouteContext','GpsService','PoiRepository','DrivingAdvisor','version:\'3.0.0-rc2\'']: assert token in engine
+          assert '<script src="rc2-app-services-v3.js" defer></script>' in html
+          assert html.index('rc2-app-services-v3.js') < html.index('app.js') < html.index('rc2-engine-v3.js')
+          assert "'./rc2-app-services-v3.js'" in sw
+          for token in ['RouteStore','AccountStore','GeometryStore','PoiStore','AuditStore','GpsStore','version:\'3.1.0-rc2\'']: assert token in services
+          for token in ['RouteContext','GpsService','PoiRepository','DrivingAdvisor','version:\'3.1.0-rc2\'']: assert token in engine
+          assert 'DiDauServices' in engine
           assert "p.routeId==='R-002'" not in driving
-          assert 'DiDauEngine' in driving
-          print('D1 RC2 CORE ENGINE V3 ARCHITECTURE GATE: PASS')
+          print('D1 RC2 CORE ENGINE V3.1 PHASE2 ARCHITECTURE GATE: PASS')
           PY
 
   deploy:
