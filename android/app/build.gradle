@@ -12,7 +12,6 @@ def releaseSigningReady = [releaseKeystore, releaseStorePassword, releaseKeyAlia
 android {
     namespace 'com.pdhtravel.didauday'
     compileSdk 35
-
     defaultConfig {
         applicationId 'com.pdhtravel.didauday'
         minSdk 26
@@ -20,7 +19,6 @@ android {
         versionCode 151
         versionName '1.5.1'
     }
-
     signingConfigs {
         release {
             if (releaseSigningReady) {
@@ -35,7 +33,6 @@ android {
             }
         }
     }
-
     buildTypes {
         debug {
             applicationIdSuffix '.debug'
@@ -45,25 +42,19 @@ android {
             minifyEnabled false
             shrinkResources false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-            if (releaseSigningReady) {
-                signingConfig signingConfigs.release
-            }
+            if (releaseSigningReady) signingConfig signingConfigs.release
         }
     }
 }
 
 def verifyReleaseSigningTask = tasks.register('verifyReleaseSigning') {
     doLast {
-        if (!releaseSigningReady) {
-            throw new GradleException('Release signing variables are missing. Use GitHub Actions secrets; never commit the keystore to this public repository.')
-        }
+        if (!releaseSigningReady) throw new GradleException('Release signing variables are missing. Use GitHub Actions secrets; never commit the keystore to this public repository.')
     }
 }
 
 tasks.configureEach { task ->
-    if (task.name == 'assembleRelease') {
-        task.dependsOn verifyReleaseSigningTask
-    }
+    if (task.name == 'assembleRelease') task.dependsOn verifyReleaseSigningTask
 }
 
 tasks.register('syncWebAssets', Copy) {
@@ -72,6 +63,7 @@ tasks.register('syncWebAssets', Copy) {
         include 'app.js'
         include 'rc2-core.js'
         include 'rc2-discovery.js'
+        include 'rc2-data.js'
         include 'styles.css'
         include 'manifest.webmanifest'
         include 'data/**'
