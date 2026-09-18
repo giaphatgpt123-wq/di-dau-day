@@ -26,8 +26,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for f in index.html rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js; do test -s "$f"; done
-          for f in rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js; do node --check "$f"; done
+          for f in index.html rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js rc2-install-flow-v3.js styles.css manifest.webmanifest sw.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js; do test -s "$f"; done
+          for f in rc2-app-services-v3.js app.js rc2-route-geometry-domain-v3.js rc2-core.js rc2-discovery.js rc2-data.js rc2-bulk.js rc2-seed.js rc2-geocode.js rc2-gps-health.js rc2-engine-v3.js rc2-driving.js rc2-alerts.js rc2-proactive.js rc2-driver-rest.js rc2-trip-status.js rc2-driving-mode.js rc2-unified-driving-ui.js rc2-ui-shell-v3.js rc2-bootstrap-v3.js rc2-install-flow-v3.js tests/b12-simulation.test.js tests/b13-gps-faults.test.js tests/b14-gps-hysteresis.test.js tests/core-engine-v3.test.js tests/core-v3-phase2-services.test.js tests/core-v3-phase3-route-geometry.test.js tests/core-v3-phase4-ui-bootstrap.test.js tests/core-v3-legacy-kernel-cleanup.test.js; do node --check "$f"; done
           node tests/b12-simulation.test.js
           node tests/b13-gps-faults.test.js
           node tests/b14-gps-hysteresis.test.js
@@ -42,20 +42,24 @@ jobs:
           domain=Path('rc2-route-geometry-domain-v3.js').read_text(encoding='utf-8')
           ui=Path('rc2-ui-shell-v3.js').read_text(encoding='utf-8')
           boot=Path('rc2-bootstrap-v3.js').read_text(encoding='utf-8')
+          install=Path('rc2-install-flow-v3.js').read_text(encoding='utf-8')
           app=Path('app.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
+          manifest=Path('manifest.webmanifest').read_text(encoding='utf-8')
           assert html.index('app.js') < html.index('rc2-route-geometry-domain-v3.js') < html.index('rc2-core.js')
-          assert html.index('rc2-unified-driving-ui.js') < html.index('rc2-ui-shell-v3.js') < html.index('rc2-bootstrap-v3.js')
-          assert "'./rc2-ui-shell-v3.js'" in sw and "'./rc2-bootstrap-v3.js'" in sw
+          assert html.index('rc2-unified-driving-ui.js') < html.index('rc2-ui-shell-v3.js') < html.index('rc2-bootstrap-v3.js') < html.index('rc2-install-flow-v3.js')
+          assert "'./rc2-ui-shell-v3.js'" in sw and "'./rc2-bootstrap-v3.js'" in sw and "'./rc2-install-flow-v3.js'" in sw
           for token in ['RouteDomain','GeometryDomain','recognizeRoute','edgeState','version:\'3.2.0-rc2\'']: assert token in domain
           for token in ['DiDauUiShell','renderRoutes','renderGeometry','renderLibrary','renderAdmin','version:\'3.3.0-rc2\'']: assert token in ui
           assert 'localStorage.' not in ui
           assert 'DiDauBootstrap' in boot and "version:'3.3.0-rc2'" in boot
           assert 'R-002' not in boot
+          for token in ['beforeinstallprompt','appinstalled','DiDauInstall','3.4.0-rc2','Thêm vào Màn hình chính']: assert token in install
+          assert '"display":"standalone"' in manifest and 'RC1.5' not in manifest
           assert "APP_VERSION='D1-RC2.0.0'" in app
           assert '<h2>Mạng tuyến PDH Travel</h2>' not in app
           assert len(app) < 20000
-          print('D1 RC2 CORE V3 LEGACY KERNEL CLEANUP GATE: PASS')
+          print('D1 RC2 CORE V3 + INSTALL FLOW GATE: PASS')
           PY
 
   deploy:
