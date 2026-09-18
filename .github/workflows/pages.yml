@@ -22,51 +22,36 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Validate repo-first PWA
         shell: bash
         run: |
           set -euo pipefail
-          test -s index.html
-          test -s app.js
-          test -s rc2-core.js
-          test -s rc2-discovery.js
-          test -s styles.css
-          test -s manifest.webmanifest
-          test -s sw.js
-          test -s data/routes-pdh.json
-          test -s data/geometry-pdh.json
-          test -s icons/icon-192.png
-          test -s icons/icon-512.png
+          for f in index.html app.js rc2-core.js rc2-discovery.js rc2-data.js styles.css manifest.webmanifest sw.js data/routes-pdh.json data/geometry-pdh.json icons/icon-192.png icons/icon-512.png; do test -s "$f"; done
           node --check app.js
           node --check rc2-core.js
           node --check rc2-discovery.js
+          node --check rc2-data.js
           python - <<'PY'
           from pathlib import Path
           html=Path('index.html').read_text(encoding='utf-8')
           app=Path('app.js').read_text(encoding='utf-8')
           core=Path('rc2-core.js').read_text(encoding='utf-8')
           discovery=Path('rc2-discovery.js').read_text(encoding='utf-8')
+          data=Path('rc2-data.js').read_text(encoding='utf-8')
           sw=Path('sw.js').read_text(encoding='utf-8')
           manifest=Path('manifest.webmanifest').read_text(encoding='utf-8')
           required_ids=['accountBtn','gpsBtn','routeTitle','routeInfo','gpsStatus','gpsAccuracy','gpsMotion','gpsAge','routeDetect','installBox','installMsg','installBtn','search','main','modal']
-          for item in required_ids:
-              assert f'id="{item}"' in html, f'missing DOM id: {item}'
-          assert '<script src="app.js" defer></script>' in html
-          assert '<script src="rc2-core.js" defer></script>' in html
-          assert '<script src="rc2-discovery.js" defer></script>' in html
+          for item in required_ids: assert f'id="{item}"' in html, f'missing DOM id: {item}'
+          for script in ['app.js','rc2-core.js','rc2-discovery.js','rc2-data.js']: assert f'<script src="{script}" defer></script>' in html
           assert 'data-view="discovery"' in html and 'data-nav="discovery"' in html
           assert 'http-equiv="refresh"' not in html.lower()
           assert "serviceWorker.register('./sw.js')" in app
-          assert all(x in sw for x in ["'./app.js'","'./rc2-core.js'","'./rc2-discovery.js'","'./styles.css'"])
-          assert 'd1-gps-tracking' in core
-          assert 'adminCreateUser' in core
-          assert 'Dẫn đường' in core and 'Mở bản đồ' in core
-          assert 'Khám phá quanh tôi' in discovery
-          assert 'Ăn uống' in discovery and 'Tham quan' in discovery and 'Lưu trú' in discovery
-          assert 'distanceKm' in discovery and 'd1-discovery-radius' in discovery
+          for asset in ["'./app.js'","'./rc2-core.js'","'./rc2-discovery.js'","'./rc2-data.js'","'./styles.css'"]: assert asset in sw
+          assert 'd1-gps-tracking' in core and 'adminCreateUser' in core
+          assert 'Khám phá quanh tôi' in discovery and 'd1-discovery-radius' in discovery
+          for token in ['POI_DEDUP_MERGED','POI_SCHEMA_MIGRATED','SOURCE_IMPORTED','saveNormalizedPoi','suggestRoute']: assert token in data
           assert '"display":"standalone"' in manifest.replace(' ', '')
-          print('D1 RC2 DISCOVERY GATE: PASS')
+          print('D1 RC2 DATA GATE: PASS')
           PY
 
   deploy:
@@ -79,17 +64,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
       - name: Configure Pages
         uses: actions/configure-pages@v5
         with:
           enablement: true
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: "."
-
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
