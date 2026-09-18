@@ -60,6 +60,7 @@ tasks.configureEach { task ->
 tasks.register('syncWebAssets', Copy) {
     from(rootProject.projectDir.parentFile) {
         include 'index.html'
+        include 'rc2-app-services-v3.js'
         include 'app.js'
         include 'rc2-core.js'
         include 'rc2-discovery.js'
