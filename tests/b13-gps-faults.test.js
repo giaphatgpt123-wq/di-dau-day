@@ -9,7 +9,8 @@ let poiData=[{id:'fuel-north',name:'Fuel North',category:'Cây xăng',routeId:'R
 const context={console,Math,JSON,Number,String,Boolean,Date:FakeDate,localStorage,lastFix:null,view:'test',document:{getElementById:()=>null},window:null,pois:()=>poiData,setInterval:()=>0,clearInterval:()=>{},encodeURIComponent};
 context.window=context;vm.createContext(context);
 for(const file of ['rc2-gps-health.js','rc2-driving.js','rc2-driver-rest.js'])vm.runInContext(fs.readFileSync(file,'utf8'),context,{filename:file});
-const fix=(o={})=>{context.lastFix={lat:10,lng:106,accuracy:20,speed:10,heading:0,at:now,...o};};
+let seq=0;
+const fix=(o={})=>{seq+=1;context.lastFix={lat:10,lng:106,accuracy:20,speed:10,heading:0,at:now+seq,...o};};
 
 // no GPS
 context.lastFix=null;localStorage.removeItem('d1-last-gps');
@@ -26,7 +27,9 @@ fix({accuracy:180});
 assert.equal(context.getGpsHealth().status,'POOR_ACCURACY');
 assert.equal(context.getDrivingRecommendations().mode,'GPS_POOR_ACCURACY');
 
-// null speed -> usable position but no directional assumption and rest timer pauses
+// null speed -> usable position but no directional assumption and rest timer pauses.
+// Reset health because this scenario validates null-speed semantics independently of B14 recovery hysteresis.
+context.resetGpsHealth();
 fix({speed:null,heading:null});
 let h=context.getGpsHealth();
 assert.equal(h.status,'VALID');assert.equal(h.speedKnown,false);assert.equal(h.directional,false);
@@ -45,14 +48,16 @@ now+=1000;fix({speed:10,heading:170});
 h=context.getGpsHealth();assert.equal(h.status,'HEADING_UNSTABLE');assert.equal(h.directional,false);
 assert.equal(context.getDrivingRecommendations().mode,'GPS_HEADING_UNSTABLE');
 
-// recovery after window
+// B14 recovery: after the jump window, direction remains locked until 3 distinct stable samples.
 now+=5000;fix({speed:10,heading:170});
-h=context.getGpsHealth();assert.equal(h.status,'VALID');assert.equal(h.directional,true);
+h=context.getGpsHealth();assert.equal(h.directional,false);assert.equal(h.directionLocked,true);
+now+=1000;fix({speed:10,heading:172});h=context.getGpsHealth();assert.equal(h.directional,false);
+now+=1000;fix({speed:10,heading:174});h=context.getGpsHealth();assert.equal(h.directional,true);assert.equal(h.status,'VALID');
 
 // GPS loss pauses an active driving session rather than resetting it
 context.resetDrivingRestSession();
-fix({speed:10,heading:170});r=context.getDrivingRestState();
-now+=60*60*1000;fix({speed:10,heading:170});r=context.getDrivingRestState();assert(r.elapsed>=60*60*1000);
+fix({speed:10,heading:174});r=context.getDrivingRestState();
+now+=60*60*1000;fix({speed:10,heading:174});r=context.getDrivingRestState();assert(r.elapsed>=60*60*1000);
 const elapsed=r.elapsed;
 now+=25000;context.lastFix={...context.lastFix,at:now-25000};r=context.getDrivingRestState();assert.equal(r.paused,true);assert.equal(r.elapsed,elapsed);assert.equal(Boolean(r.state.stoppedAt),false);
 
