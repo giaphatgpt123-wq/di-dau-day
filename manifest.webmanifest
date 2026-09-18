@@ -11,7 +11,7 @@
   "dir":"ltr",
   "background_color":"#f3f6f4",
   "theme_color":"#163d2a",
-  "description":"PDH Travel / Đi Đâu Đây D1 RC1.5 - route engine, GPS trace, geometry, thư viện và tài khoản cục bộ.",
+  "description":"Đi Đâu Đây D1 RC2 - du lịch đường dài, GPS, tuyến, thư viện địa điểm và quản trị cục bộ.",
   "categories":["travel","navigation"],
   "prefer_related_applications":false,
   "icons":[
