@@ -1,0 +1,24 @@
+{
+  "region_id": "VN-KG-HA-TIEN",
+  "name": "Hà Tiên",
+  "province": "Kiên Giang",
+  "country": "VN",
+  "pilot": true,
+  "categories": [
+    "FOOD",
+    "COFFEE",
+    "LODGING",
+    "FUEL",
+    "ATTRACTION"
+  ],
+  "query_year": 2026,
+  "collection": {
+    "radius_km": 30,
+    "incremental": true,
+    "max_retries": 3
+  },
+  "publish": {
+    "min_confidence": 0.75,
+    "require_geo": true
+  }
+}
