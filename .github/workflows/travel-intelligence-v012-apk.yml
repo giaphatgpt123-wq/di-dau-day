@@ -20,31 +20,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Rebuild and verify source archive
+      - name: Rebuild and verify clean source archive
         shell: bash
         run: |
-          cat \
-            ci/travel-intelligence-v012-clean/source.b64.part00a \
-            ci/travel-intelligence-v012-clean/source.b64.part00tail \
-            ci/travel-intelligence-v012-clean/source.b64.part00b \
-            ci/travel-intelligence-v012-clean/source.b64.part01 \
-            ci/travel-intelligence-v012-clean/source.b64.part02 \
-            ci/travel-intelligence-v012-clean/source.b64.part03 \
-            ci/travel-intelligence-v012-clean/source.b64.part04a \
-            ci/travel-intelligence-v012-clean/source.b64.part04b \
-            ci/travel-intelligence-v012-clean/source.b64.part05a \
-            ci/travel-intelligence-v012-clean/source.b64.part05b \
-            ci/travel-intelligence-v012-clean/source.b64.part06 \
-            > /tmp/travel-intelligence-v012-source.b64
-          LEN=$(wc -c < /tmp/travel-intelligence-v012-source.b64)
+          cat ci/travel-intelligence-v012-clean/part{00..10} > /tmp/source.b64
+          LEN=$(wc -c < /tmp/source.b64)
           echo "Base64 chars: $LEN"
-          test "$LEN" -eq 122656
-          base64 --decode /tmp/travel-intelligence-v012-source.b64 > /tmp/travel-intelligence-v012-source.zip
-          echo 'a02949805c6ca6f4f69b01c67616d08a78eb8ff4b9a0b2a1a03ff5469cc0990d  /tmp/travel-intelligence-v012-source.zip' | sha256sum -c -
-          unzip -t /tmp/travel-intelligence-v012-source.zip
+          test "$LEN" -eq 143920
+          test $((LEN % 4)) -eq 0
+          base64 --decode /tmp/source.b64 > /tmp/travel-intelligence-v012-ci-source.zip
+          echo '211975fafb729d60874701fd775dc21b666b8c21c4922d8990fab60d7cce4788  /tmp/travel-intelligence-v012-ci-source.zip' | sha256sum -c -
+          unzip -t /tmp/travel-intelligence-v012-ci-source.zip
           rm -rf build-src
           mkdir build-src
-          unzip -q /tmp/travel-intelligence-v012-source.zip -d build-src
+          unzip -q /tmp/travel-intelligence-v012-ci-source.zip -d build-src
           find build-src -maxdepth 2 -type f | sort | head -50
 
       - name: Set up JDK 17
