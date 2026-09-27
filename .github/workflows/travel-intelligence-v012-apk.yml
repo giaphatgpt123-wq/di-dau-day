@@ -59,7 +59,8 @@ jobs:
           test -x "$SDKMANAGER"
           echo "sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" 'platform-tools' 'platforms;android-37'
+          "$SDKMANAGER" --list --channel=3 | grep -E 'platforms;android-37|build-tools;37' || true
+          "$SDKMANAGER" --channel=3 'platform-tools' 'platforms;android-37'
           test -d "$SDK_ROOT/platforms/android-37"
 
       - name: Set up Gradle 9.6.0
