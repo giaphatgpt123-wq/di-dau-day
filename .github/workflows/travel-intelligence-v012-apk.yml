@@ -42,7 +42,7 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Prepare Android SDK and API 37
+      - name: Prepare Android SDK and API 37.0
         shell: bash
         run: |
           SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
@@ -59,9 +59,9 @@ jobs:
           test -x "$SDKMANAGER"
           echo "sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses >/dev/null || true
-          "$SDKMANAGER" --list --channel=3 | grep -E 'platforms;android-37|build-tools;37' || true
-          "$SDKMANAGER" --channel=3 'platform-tools' 'platforms;android-37'
-          test -d "$SDK_ROOT/platforms/android-37"
+          "$SDKMANAGER" --list --channel=3 | grep -E 'platforms;android-37\.0|build-tools;37\.0\.0' || true
+          "$SDKMANAGER" --channel=3 'platform-tools' 'platforms;android-37.0' 'build-tools;37.0.0'
+          test -d "$SDK_ROOT/platforms/android-37.0"
 
       - name: Set up Gradle 9.6.0
         uses: gradle/actions/setup-gradle@v4
