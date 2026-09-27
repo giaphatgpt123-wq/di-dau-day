@@ -42,6 +42,14 @@ jobs:
           distribution: temurin
           java-version: '17'
 
+      - name: Prepare Android SDK directories
+        shell: bash
+        run: |
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "Preparing SDK root: $SDK_ROOT"
+          sudo mkdir -p "$SDK_ROOT/licenses"
+          sudo chown -R "$USER":"$USER" "$SDK_ROOT/licenses"
+
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
