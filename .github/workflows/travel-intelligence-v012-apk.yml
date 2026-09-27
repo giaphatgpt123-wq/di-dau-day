@@ -23,7 +23,10 @@ jobs:
       - name: Rebuild source archive
         shell: bash
         run: |
-          cat ci/travel-intelligence-v012/source.b64.part* > /tmp/travel-intelligence-v012-source.b64
+          cat ci/travel-intelligence-v012/source.b64.part* | tr -cd 'A-Za-z0-9+/=' > /tmp/travel-intelligence-v012-source.b64
+          LEN=$(wc -c < /tmp/travel-intelligence-v012-source.b64)
+          echo "Base64 chars: $LEN"
+          test $((LEN % 4)) -eq 0
           base64 --decode /tmp/travel-intelligence-v012-source.b64 > /tmp/travel-intelligence-v012-source.zip
           unzip -t /tmp/travel-intelligence-v012-source.zip
           rm -rf build-src
