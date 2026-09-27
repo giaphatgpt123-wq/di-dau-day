@@ -1,0 +1,83 @@
+name: Travel Intelligence V0.12 APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - travel-intelligence-v012-build-ci2
+    paths:
+      - 'ci/travel-intelligence-v012/**'
+      - '.github/workflows/travel-intelligence-v012-apk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Rebuild source archive
+        shell: bash
+        run: |
+          cat ci/travel-intelligence-v012/source.b64.part* > /tmp/travel-intelligence-v012-source.b64
+          base64 --decode /tmp/travel-intelligence-v012-source.b64 > /tmp/travel-intelligence-v012-source.zip
+          unzip -t /tmp/travel-intelligence-v012-source.zip
+          rm -rf build-src
+          mkdir build-src
+          unzip -q /tmp/travel-intelligence-v012-source.zip -d build-src
+          find build-src -maxdepth 2 -type f | sort | head -50
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android API 37
+        shell: bash
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platform-tools' 'platforms;android-37'
+
+      - name: Set up Gradle 9.6.0
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.0'
+
+      - name: Detect project root
+        id: project
+        shell: bash
+        run: |
+          ROOT=$(find build-src -name settings.gradle.kts -type f -print -quit | xargs dirname)
+          test -n "$ROOT"
+          echo "root=$ROOT" >> "$GITHUB_OUTPUT"
+          echo "Project root: $ROOT"
+
+      - name: Build debug APK
+        working-directory: ${{ steps.project.outputs.root }}
+        run: gradle --no-daemon --stacktrace :app:assembleDebug
+
+      - name: Verify APK
+        shell: bash
+        run: |
+          APK=$(find '${{ steps.project.outputs.root }}/app/build/outputs/apk/debug' -name '*.apk' -type f | head -n1)
+          test -n "$APK"
+          mkdir -p out
+          cp "$APK" out/TravelIntelligence-v0.12-debug.apk
+          sha256sum out/TravelIntelligence-v0.12-debug.apk | tee out/SHA256.txt
+          ls -lh out/TravelIntelligence-v0.12-debug.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TravelIntelligence-v0.12-debug-apk
+          path: out/
+          if-no-files-found: error
+          retention-days: 30
