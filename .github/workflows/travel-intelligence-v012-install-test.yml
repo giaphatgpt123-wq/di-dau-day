@@ -1,0 +1,71 @@
+name: Travel Intelligence V0.12 Install Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - travel-intelligence-v012-build-ci2
+    paths:
+      - '.github/workflows/travel-intelligence-v012-install-test.yml'
+
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  install-launch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download verified APK artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: TravelIntelligence-v0.12-debug-apk
+          path: out
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          repository: giaphatgpt123-wq/di-dau-day
+          run-id: 36375900330
+
+      - name: Verify downloaded APK
+        shell: bash
+        run: |
+          test -f out/TravelIntelligence-v0.12-debug.apk
+          unzip -tq out/TravelIntelligence-v0.12-debug.apk
+          echo 'd1f9a2cd75002eb08f008fdcdd40edbfdf327c2b55ce676d436a0d5db8a7afa9  out/TravelIntelligence-v0.12-debug.apk' | sha256sum -c -
+          echo APK_DOWNLOAD_VERIFIED
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Enable KVM
+        shell: bash
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Install and launch on Android emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
+          script: |
+            adb install -r out/TravelIntelligence-v0.12-debug.apk
+            PACKAGE_PATH=$(adb shell pm path com.travelintelligence.app.debug | tr -d '\r')
+            echo "$PACKAGE_PATH"
+            test -n "$PACKAGE_PATH"
+            adb shell am force-stop com.travelintelligence.app.debug
+            adb shell am start -W -n com.travelintelligence.app.debug/com.travelintelligence.app.MainActivity
+            sleep 4
+            PID=$(adb shell pidof com.travelintelligence.app.debug | tr -d '\r')
+            echo "PID=$PID"
+            test -n "$PID"
+            adb shell dumpsys activity activities | grep -F 'com.travelintelligence.app.debug/com.travelintelligence.app.MainActivity'
+            echo APK_INSTALL_AND_LAUNCH_PASS
